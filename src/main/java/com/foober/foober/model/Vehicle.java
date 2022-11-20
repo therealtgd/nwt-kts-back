@@ -9,8 +9,8 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Vehicle {
-    private UUID ID;
-    private String registrationPlate;
+    private UUID Id;
+    private String licencePlate;
     private int capacity;
     private boolean petsAllowed;
     private boolean babiesAllowed;

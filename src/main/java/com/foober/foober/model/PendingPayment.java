@@ -9,9 +9,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class PendingPayment {
-    private UUID ID;
+    private UUID Id;
     private Client client;
-    private Drive drive;
+    private Ride ride;
     private PaymentStatus status;
     private double amount;
 }

@@ -8,7 +8,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Address {
-    private UUID ID;
+    private UUID Id;
     private String latitude;
     private String longitude;
     private String streetAddress;

@@ -8,9 +8,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Review {
-    private UUID ID;
+    private UUID Id;
     private int rating;
-    private Driver driver;
+    private Ride ride;
     private Client client;
     private Long timeStamp;
 }

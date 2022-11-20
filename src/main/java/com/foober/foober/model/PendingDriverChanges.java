@@ -8,10 +8,10 @@ import java.util.UUID;
 @Getter
 @Setter
 public class PendingDriverChanges {
-    private UUID ID;
+    private UUID Id;
     private String firstName;
     private String lastName;
-    private String image;
+    private String profilePicture;
     private Vehicle vehicle;
     private Long timeStamp;
 }

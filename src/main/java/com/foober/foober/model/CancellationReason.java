@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class CancellationReasoning {
-    private UUID ID;
+public class CancellationReason {
+    private UUID Id;
     private String text;
-    private Drive drive;
+    private Ride ride;
 }

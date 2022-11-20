@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class User {
-    private UUID ID;
+    private UUID Id;
     private String username;
     private String password;
     private String firstName;

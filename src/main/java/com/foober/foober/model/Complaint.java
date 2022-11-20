@@ -8,8 +8,8 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Complaint {
-    private UUID ID;
+    private UUID Id;
     private String text;
-    private Drive drive;
+    private Ride ride;
     private Client client;
 }
