@@ -4,10 +4,12 @@ import com.foober.foober.model.enumeration.PaymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class PendingPayment {
-    private int ID;
+    private UUID ID;
     private Client client;
     private Drive drive;
     private PaymentStatus status;

@@ -4,10 +4,12 @@ import com.foober.foober.model.enumeration.Role;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class User {
-    private int ID;
+    private UUID ID;
     private String username;
     private String password;
     private String firstName;

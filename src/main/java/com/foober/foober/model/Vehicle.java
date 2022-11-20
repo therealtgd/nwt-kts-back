@@ -4,10 +4,12 @@ import com.foober.foober.model.enumeration.VehicleType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class Vehicle {
-    public int ID;
+    private UUID ID;
     private String registrationPlate;
     private int capacity;
     private boolean petsAllowed;

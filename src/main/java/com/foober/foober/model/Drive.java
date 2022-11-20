@@ -6,11 +6,12 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class Drive {
-    private int ID;
+    private UUID ID;
     private List<Address> route;
     private Set<Client> clients;
     private double price;
