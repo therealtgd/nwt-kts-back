@@ -1,0 +1,22 @@
+services:
+  db:
+    container_name: postgres
+    image: postgres
+    volumes:
+      - db:/data/postgres
+    environment:
+      - POSTGRES_USER=rootuser
+      - POSTGRES_PASSWORD=rootpass
+      - POSTGRES_DB=foober
+      - PGDATA= /data/postgres
+    networks:
+      - db
+    restart: unless-stopped
+    ports:
+      - "5332:5432"
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
