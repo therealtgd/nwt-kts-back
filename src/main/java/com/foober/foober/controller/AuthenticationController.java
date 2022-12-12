@@ -32,10 +32,12 @@ public class AuthenticationController {
                 passwordEncoder.encode(request.getPassword())
             )
         );
+
         final UserDetails user = userDao.findUserByUsername(request.getUsername());
         if (user != null) {
             return ResponseEntity.ok(jwtUtil.generateToken(user));
         }
+
         return ResponseEntity.status(400).body("Some error has occurred.");
     }
 }
