@@ -1,20 +1,17 @@
 package com.foober.foober.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @Entity(name = "Complaint")
-@Table(name = "complaints")
 public class Complaint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Type(type="uuid-char")
     private UUID id;
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
     private String text;

@@ -1,24 +1,22 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.Role;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name="users")
 @Inheritance(strategy= InheritanceType.JOINED)
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Type(type="uuid-char")
     protected UUID id;
     @Column(name = "username", nullable = false, columnDefinition = "TEXT", unique = true)
     protected String username;

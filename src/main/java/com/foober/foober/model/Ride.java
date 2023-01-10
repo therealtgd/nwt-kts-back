@@ -1,22 +1,19 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.RideStatus;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.Set;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "rides")
 public class Ride {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Type(type="uuid-char")
     private UUID id;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id")
