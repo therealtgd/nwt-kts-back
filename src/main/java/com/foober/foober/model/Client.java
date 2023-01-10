@@ -1,19 +1,16 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.Role;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity(name = "Client")
-@Table(name = "clients")
 public class Client extends User {
 
     @Column(name = "city", nullable = false, columnDefinition = "TEXT")

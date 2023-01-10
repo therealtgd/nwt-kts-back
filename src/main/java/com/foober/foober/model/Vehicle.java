@@ -1,21 +1,18 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.VehicleType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "vehicles")
 public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Type(type="uuid-char")
     private UUID id;
     @Column(name="licence_plate", nullable = false, columnDefinition = "TEXT")
     private String licencePlate;
