@@ -1,12 +1,13 @@
 package com.foober.foober.dto;
 
 import javax.validation.constraints.*;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class ClientRegistration {
     @NotEmpty
