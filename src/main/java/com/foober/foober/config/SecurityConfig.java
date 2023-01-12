@@ -26,6 +26,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CORSFilter corsFilter;
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDao userDao;
 
@@ -35,17 +36,17 @@ public class SecurityConfig {
             .cors()
             .and()
             .csrf().disable()
+            .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(
                 authorize -> authorize
-                    .requestMatchers("**/auth", "/login", "/signup").permitAll()
+                    .requestMatchers("/api/v1/auth/**").permitAll()
                     .anyRequest().authenticated()
             )
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .formLogin();
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -87,6 +88,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userDao.findUserByUsername(username);
+        return userDao::findUserByUsername;
     }
 }
