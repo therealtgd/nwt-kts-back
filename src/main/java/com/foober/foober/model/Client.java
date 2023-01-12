@@ -26,8 +26,8 @@ public class Client extends User {
                   Role authority,
                   String image,
                   String phoneNumber,
-                  boolean isActivated,
                   String paymentInfo) {
+        this.enabled = true;
         this.username = username;
         this.email = email;
         this.password = password;
@@ -36,7 +36,7 @@ public class Client extends User {
         this.authority = authority;
         this.image = image;
         this.phoneNumber = phoneNumber;
-        this.isActivated = isActivated;
+        this.isActivated = false;
         this.paymentInfo = paymentInfo;
     }
 }
