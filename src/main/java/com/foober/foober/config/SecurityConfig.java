@@ -39,7 +39,7 @@ public class SecurityConfig {
             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(
                 authorize -> authorize
-                    .requestMatchers("/api/v1/auth/**", "/client/register").permitAll()
+                    .requestMatchers("/api/v1/auth/**", "/client/register", "/client/register/confirm").permitAll()
                     .anyRequest().authenticated()
             )
             .sessionManagement()
