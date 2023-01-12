@@ -14,7 +14,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public User findUserByUsername(String username) throws UserNotFoundException {
-        Optional<User> user = userRepository.findUserByUsername(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty())
             throw new UserNotFoundException();
         return user.get();

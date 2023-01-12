@@ -36,7 +36,7 @@ public abstract class User implements UserDetails {
     @Column(name = "image", columnDefinition = "TEXT")
     protected String image;
     @Column(name="enabled", nullable = false)
-    private boolean enabled;
+    protected boolean enabled;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
