@@ -26,7 +26,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CORSFilter corsFilter;
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDao userDao;
 
@@ -36,7 +35,6 @@ public class SecurityConfig {
             .cors()
             .and()
             .csrf().disable()
-            .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(
                 authorize -> authorize
                     .requestMatchers("/api/v1/auth/**", "/client/register", "/client/register/confirm").permitAll()
