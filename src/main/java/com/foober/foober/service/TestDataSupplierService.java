@@ -37,6 +37,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         admin.setFirstName("Ana");
         admin.setLastName("Andjelic");
         admin.setAuthority(roleRepository.findByName("ROLE_ADMIN").get());
+        userRepository.save(admin);
 
         Driver driver = new Driver();
         driver.setEnabled(true);
@@ -46,15 +47,20 @@ public class TestDataSupplierService implements CommandLineRunner {
         driver.setFirstName("Nikola");
         driver.setLastName("Damjanovic");
         driver.setAuthority(roleRepository.findByName("ROLE_DRIVER").get());
+        userRepository.save(driver);
 
         Client client = new Client();
-        client.setEnabled(true);
         client.setUsername("client");
         client.setEmail("client@gmail.com");
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Vladan");
         client.setLastName("Mikic");
         client.setAuthority(roleRepository.findByName("ROLE_CLIENT").get());
+        client.setImage("");
+        client.setPaymentInfo("");
+        client.setPhoneNumber("068419532");
+        client.setEnabled(true);
+        userRepository.save(client);
     }
 
     private void initializeRoles() {

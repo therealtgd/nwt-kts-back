@@ -1,13 +1,40 @@
 package com.foober.foober.exception;
 
+import com.foober.foober.exception.error.ValidationErrorResponseBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class ControllerAdvisor {
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ValidationErrorResponseBody handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        ex.getBindingResult().getGlobalErrors().forEach(error -> {
+            String objectName = error.getObjectName();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(objectName, errorMessage);
+        });
+
+        return new ValidationErrorResponseBody(
+                HttpStatus.BAD_REQUEST.value(),
+                "Field validation failed.",
+                errors);
+    }
     @ResponseStatus(HttpStatus.GONE)
     @ExceptionHandler(ConfirmationLinkExpiredException.class)
     public ResponseEntity<String> handleConfirmationLinkExpiredException(ConfirmationLinkExpiredException e) {
