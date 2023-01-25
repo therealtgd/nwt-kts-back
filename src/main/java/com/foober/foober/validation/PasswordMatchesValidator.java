@@ -1,26 +1,15 @@
 package com.foober.foober.validation;
 
-import com.foober.foober.dto.ClientRegistration;
+import com.foober.foober.dto.ClientSignUpRequest;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object> {
+public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, ClientSignUpRequest> {
 
-    @Override
-    public void initialize(PasswordMatches constraintAnnotation) {
-    }
-    @Override
-    public boolean isValid(Object obj, ConstraintValidatorContext context){
-        if (obj instanceof ClientRegistration dto) {
-            return passwordsMatch(dto.getPassword(), dto.getConfirmPassword());
-        }
-        return false;
-    }
+	@Override
+	public boolean isValid(final ClientSignUpRequest user, final ConstraintValidatorContext context) {
+		return user.getPassword().equals(user.getConfirmPassword());
+	}
 
-    private boolean passwordsMatch(String password, String confirmation) {
-        if (password == null || confirmation == null)
-            return false;
-        return password.equals(confirmation);
-    }
 }

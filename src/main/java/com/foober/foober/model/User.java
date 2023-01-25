@@ -1,15 +1,14 @@
 package com.foober.foober.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,31 +16,29 @@ import java.util.UUID;
 @Entity
 @Inheritance(strategy= InheritanceType.JOINED)
 @Table(name = "Users")
-public abstract class User implements UserDetails {
+public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    protected UUID id;
+    @SequenceGenerator(name = "mySeqGenV1", sequenceName = "mySeqV1", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGenV1")
+    protected Long id;
     @Column(name = "username", nullable = false, columnDefinition = "TEXT", unique = true)
     protected String username;
     @Column(name = "email", nullable = false, columnDefinition = "TEXT", unique = true)
     protected String email;
     @Column(name = "password", nullable = false, columnDefinition = "TEXT")
     protected String password;
-    @Column(name = "first_name", nullable = false, columnDefinition = "TEXT")
-    protected String firstName;
-    @Column(name = "last_name", nullable = false, columnDefinition = "TEXT")
-    protected String lastName;
-    @ManyToOne
-    protected Role authority;
+    @Column(name = "display_name", nullable = false, columnDefinition = "TEXT")
+    protected String displayName;
+    @ManyToMany(fetch = FetchType.EAGER)
+    protected Set<Role> authorities = new HashSet<>();
     @Column(name = "image", columnDefinition = "TEXT")
     protected String image;
     @Column(name="enabled", nullable = false)
     protected boolean enabled;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(authority);
-    }
+    @Column(name="provider")
+    protected String provider;
+    @Column(name = "provider_user_id")
+    protected String providerUserId;
 
     @Override
     public boolean isAccountNonExpired() {

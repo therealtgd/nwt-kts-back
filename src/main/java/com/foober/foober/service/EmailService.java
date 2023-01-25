@@ -1,7 +1,7 @@
 package com.foober.foober.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import com.foober.foober.model.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,7 +24,7 @@ public class EmailService {
     @Async
     public void sendRegistrationEmail(Client client, String token) throws MessagingException, IOException {
         HashMap<String, String> variables = new HashMap<>();
-        variables.put("name", client.getFirstName());
+        variables.put("name", client.getDisplayName());
         variables.put("link", "http://localhost:4200/confirm-registration/" + token);
 
         sendEmail(variables, "Registration Confirmation", client.getEmail());

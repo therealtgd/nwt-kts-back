@@ -1,17 +1,20 @@
 package com.foober.foober.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity(name = "Client")
+@Entity
+@Table(name = "Client")
 public class Client extends User {
 
-    @Column(name="phone_number", nullable = false, columnDefinition = "TEXT")
+    @Column(name="phone_number", columnDefinition = "TEXT")
     private String phoneNumber;
     @Column(name="is_activated", nullable = false)
     private boolean isActivated;
@@ -21,22 +24,24 @@ public class Client extends User {
     public Client(String username,
                   String email,
                   String password,
-                  String firstName,
-                  String lastName,
-                  Role authority,
+                  String displayName,
+                  Set<Role> authorities,
                   String image,
                   String phoneNumber,
-                  String paymentInfo) {
+                  String paymentInfo,
+                  String provider,
+                  String providerUserId) {
         this.enabled = true;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.authority = authority;
+        this.displayName = displayName;
+        this.authorities = authorities;
         this.image = image;
         this.phoneNumber = phoneNumber;
         this.isActivated = false;
         this.paymentInfo = paymentInfo;
+        this.provider = provider;
+        this.providerUserId = providerUserId;
     }
 }

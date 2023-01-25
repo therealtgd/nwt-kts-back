@@ -1,6 +1,6 @@
 package com.foober.foober.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,12 +8,13 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-@Entity(name = "Address")
+@Entity
+@Table(name = "Address")
 public class Address {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private double latitude;
     private double longitude;
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")

@@ -1,7 +1,7 @@
 package com.foober.foober.controller;
 
-import com.foober.foober.dto.ClientRegistration;
-import com.foober.foober.dto.ClientRegistrationConfirmationDTO;
+import com.foober.foober.dto.ClientSignUpRequest;
+import com.foober.foober.dto.ClientSignUpConfirmation;
 import com.foober.foober.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -21,14 +21,8 @@ public class ClientController {
     @Autowired
     ClientService clientService;
 
-    @PostMapping(value = "/register")
-    public ResponseEntity<String> registerClient(@Valid @RequestBody ClientRegistration registrationData) {
-        clientService.registerClient(registrationData);
-        return ResponseEntity.ok("Registration email sent");
-    }
-
     @PostMapping("/register/confirm")
-    public ResponseEntity<String> confirmRegistration(@Valid @RequestBody ClientRegistrationConfirmationDTO data) {
+    public ResponseEntity<String> confirmRegistration(@Valid @RequestBody ClientSignUpConfirmation data) {
         clientService.confirmRegistration(data.getToken());
         return ResponseEntity.ok("Registration confirmed.");
     }

@@ -1,7 +1,7 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.RideStatus;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,10 +11,11 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Entity
+@Table(name = "Ride")
 public class Ride {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id")
     private Set<Address> route;

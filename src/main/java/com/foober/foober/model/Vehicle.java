@@ -1,7 +1,7 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.VehicleType;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,10 +10,11 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Entity
+@Table(name = "Vehicle")
 public class Vehicle {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(name="licence_plate", nullable = false, columnDefinition = "TEXT")
     private String licencePlate;
     @Column(name="capacity", nullable = false)

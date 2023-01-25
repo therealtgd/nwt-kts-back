@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface CancellationReasonRepository extends JpaRepository<CancellationReason, UUID> {
+public interface CancellationReasonRepository extends JpaRepository<CancellationReason, Long> {
 }

@@ -8,10 +8,13 @@ import com.foober.foober.repos.RoleRepository;
 import com.foober.foober.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 @Component
 public class TestDataSupplierService implements CommandLineRunner {
@@ -19,8 +22,7 @@ public class TestDataSupplierService implements CommandLineRunner {
     UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public void run(String... args) throws Exception {
@@ -34,9 +36,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         admin.setUsername("admin");
         admin.setEmail("admin@gmail.com");
         admin.setPassword(passwordEncoder.encode("admin"));
-        admin.setFirstName("Ana");
-        admin.setLastName("Andjelic");
-        admin.setAuthority(roleRepository.findByName("ROLE_ADMIN").get());
+        admin.setDisplayName("Ana Andjelic");
+        admin.setAuthorities(Set.of(roleRepository.findByName("ROLE_ADMIN"), roleRepository.findByName("ROLE_USER")));
         userRepository.save(admin);
 
         Driver driver = new Driver();
@@ -44,18 +45,16 @@ public class TestDataSupplierService implements CommandLineRunner {
         driver.setUsername("driver");
         driver.setEmail("driver@gmail.com");
         driver.setPassword(passwordEncoder.encode("driver"));
-        driver.setFirstName("Nikola");
-        driver.setLastName("Damjanovic");
-        driver.setAuthority(roleRepository.findByName("ROLE_DRIVER").get());
+        driver.setDisplayName("Nikola Damjanovic");
+        driver.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
         userRepository.save(driver);
 
         Client client = new Client();
         client.setUsername("client");
         client.setEmail("client@gmail.com");
         client.setPassword(passwordEncoder.encode("client"));
-        client.setFirstName("Vladan");
-        client.setLastName("Mikic");
-        client.setAuthority(roleRepository.findByName("ROLE_CLIENT").get());
+        client.setDisplayName("Vladan Mikic");
+        client.setAuthorities(Set.of(roleRepository.findByName("ROLE_CLIENT"), roleRepository.findByName("ROLE_USER")));
         client.setImage("");
         client.setPaymentInfo("");
         client.setPhoneNumber("068419532");
@@ -67,5 +66,6 @@ public class TestDataSupplierService implements CommandLineRunner {
         roleRepository.save(new Role("ROLE_ADMIN"));
         roleRepository.save(new Role("ROLE_DRIVER"));
         roleRepository.save(new Role("ROLE_CLIENT"));
+        roleRepository.save(new Role("ROLE_USER"));
     }
 }
