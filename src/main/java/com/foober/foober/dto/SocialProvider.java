@@ -2,7 +2,7 @@ package com.foober.foober.dto;
 
 public enum SocialProvider {
 
-    GOOGLE("google"), LOCAL("local");
+    FACEBOOK("facebook"), GOOGLE("google"), LOCAL("local");
 
     private String providerType;
 

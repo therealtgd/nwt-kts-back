@@ -51,9 +51,9 @@ public class UserService {
         }
 
         try {
+            client = userRepository.save(client);
             String token = tokenUtils.generateConfirmationToken(client);
             emailService.sendRegistrationEmail(client, token);
-            userRepository.save(client);
             return client;
         } catch (MessagingException e) {
             throw new EmailNotSentException("Email failed to send.");

@@ -75,7 +75,7 @@ public class TokenProvider {
 
     public String generateConfirmationToken(User user) {
         return JWT.create()
-                .withSubject(user.getUsername())
+                .withSubject(Long.toString(user.getId()))
                 .withIssuedAt(Date.from(ZonedDateTime.now().toInstant()))
                 .withExpiresAt(Date.from(ZonedDateTime.now().plusMinutes(15).toInstant()))
                 .withIssuer(appProperties.getAuth().getIssuer())
