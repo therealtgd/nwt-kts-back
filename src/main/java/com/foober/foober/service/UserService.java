@@ -140,8 +140,6 @@ public class UserService {
                 passwordEncoder.encode(formDTO.getPassword()),
                 formDTO.getDisplayName(),
                 roles,
-                // TODO: Add image
-                formDTO.getImage(),
                 formDTO.getPhoneNumber(),
                 // TODO: Add payment info
                 "",

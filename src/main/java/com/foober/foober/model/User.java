@@ -31,8 +31,9 @@ public class User implements UserDetails {
     protected String displayName;
     @ManyToMany(fetch = FetchType.EAGER)
     protected Set<Role> authorities = new HashSet<>();
-    @Column(name = "image", columnDefinition = "TEXT")
-    protected String image;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id")
+    protected Image image;
     @Column(name="enabled", nullable = false)
     protected boolean enabled;
     @Column(name="provider")

@@ -5,6 +5,7 @@ import com.foober.foober.dto.SocialProvider;
 import com.foober.foober.dto.UserInfo;
 import com.foober.foober.model.Role;
 import com.foober.foober.model.User;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class GeneralUtils {
     public static UserInfo buildUserInfo(LocalUser localUser) {
         List<String> roles = localUser.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
         User user = localUser.getUser();
-        return new UserInfo(user.getId().toString(), user.getDisplayName(), user.getEmail(), roles);
+        String image = Base64.encodeBase64String(user.getImage().getData());
+        return new UserInfo(user.getId().toString(), image, user.getDisplayName(), user.getEmail(), roles);
     }
+
 }
