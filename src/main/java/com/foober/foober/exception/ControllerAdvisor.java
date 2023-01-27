@@ -91,4 +91,9 @@ public class ControllerAdvisor {
     public ResponseEntity<String> handleUserAlreadyActivatedException(UserAlreadyActivatedException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(UserIsNotActivatedException.class)
+    public ResponseEntity<String> handleUserAlreadyActivatedException(UserIsNotActivatedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }
