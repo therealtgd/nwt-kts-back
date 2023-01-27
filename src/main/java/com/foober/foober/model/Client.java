@@ -26,7 +26,6 @@ public class Client extends User {
                   String password,
                   String displayName,
                   Set<Role> authorities,
-                  String image,
                   String phoneNumber,
                   String paymentInfo,
                   String provider,
@@ -37,7 +36,6 @@ public class Client extends User {
         this.password = password;
         this.displayName = displayName;
         this.authorities = authorities;
-        this.image = image;
         this.phoneNumber = phoneNumber;
         this.isActivated = false;
         this.paymentInfo = paymentInfo;

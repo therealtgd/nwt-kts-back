@@ -2,6 +2,7 @@ package com.foober.foober.controller;
 
 import javax.validation.Valid;
 
+import com.foober.foober.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,13 +51,14 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
+    public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
         try {
-            userService.registerNewUser(signUpRequest);
+            User user = userService.registerNewUser(signUpRequest);
+            return ResponseEntity.ok().body(new ApiResponse(true, user.getEmail()));
         } catch (UserAlreadyExistsException e) {
             log.error("Exception Ocurred", e);
             return new ResponseEntity<>(new ApiResponse(false, "Email Address already in use!"), HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok().body(new ApiResponse(true, "User registered successfully"));
     }
+
 }

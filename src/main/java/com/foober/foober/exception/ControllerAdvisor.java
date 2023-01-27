@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +71,11 @@ public class ControllerAdvisor {
     public ResponseEntity<String> handleInvalidTokenException(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to upload. File is too large.");
+    }
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
@@ -83,6 +89,11 @@ public class ControllerAdvisor {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserAlreadyActivatedException.class)
     public ResponseEntity<String> handleUserAlreadyActivatedException(UserAlreadyActivatedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(UserIsNotActivatedException.class)
+    public ResponseEntity<String> handleUserAlreadyActivatedException(UserIsNotActivatedException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

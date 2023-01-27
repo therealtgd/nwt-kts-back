@@ -17,7 +17,7 @@ public class ClientSignUpRequest {
     @Pattern(regexp = "[a-zA-Za-šA-Š]*")
     private String username;
     @NotEmpty
-    @Size(min = 2, max = 20)
+    @Size(min = 2, max = 30)
     @Email
     private String email;
     @NotEmpty
@@ -32,7 +32,6 @@ public class ClientSignUpRequest {
     @Size(min = 6, max = 20)
     @Pattern(regexp = "[a-zA-Za-šA-Š0-9]*")
     private String confirmPassword;
-    private String image;
     private SocialProvider socialProvider;
     private String providerUserId;
 

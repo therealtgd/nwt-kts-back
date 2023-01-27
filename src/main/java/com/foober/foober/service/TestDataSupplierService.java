@@ -55,7 +55,6 @@ public class TestDataSupplierService implements CommandLineRunner {
         client.setPassword(passwordEncoder.encode("client"));
         client.setDisplayName("Vladan Mikic");
         client.setAuthorities(Set.of(roleRepository.findByName("ROLE_CLIENT"), roleRepository.findByName("ROLE_USER")));
-        client.setImage("");
         client.setPaymentInfo("");
         client.setPhoneNumber("068419532");
         client.setEnabled(true);
