@@ -4,6 +4,7 @@ import com.foober.foober.dto.ClientSignUpRequest;
 import com.foober.foober.dto.LocalUser;
 import com.foober.foober.dto.SocialProvider;
 import com.foober.foober.model.Role;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.foober.foober.exception.*;
@@ -29,16 +30,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class UserService {
-    @Autowired
-    private TokenProvider tokenUtils;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private EmailService emailService;
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final TokenProvider tokenUtils;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User registerNewUser(ClientSignUpRequest signUpRequest) throws UserAlreadyExistsException {
 

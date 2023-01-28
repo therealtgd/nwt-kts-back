@@ -1,10 +1,12 @@
 package com.foober.foober.controller;
 
-import javax.validation.Valid;
-
+import com.foober.foober.dto.*;
 import com.foober.foober.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.foober.foober.security.jwt.TokenProvider;
+import com.foober.foober.service.UserService;
+import com.foober.foober.util.GeneralUtils;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,31 +17,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foober.foober.dto.ApiResponse;
-import com.foober.foober.dto.AuthResponse;
-import com.foober.foober.dto.LocalUser;
-import com.foober.foober.dto.LoginRequest;
-import com.foober.foober.dto.ClientSignUpRequest;
-import com.foober.foober.exception.UserAlreadyExistsException;
-import com.foober.foober.security.jwt.TokenProvider;
-import com.foober.foober.service.UserService;
-import com.foober.foober.util.GeneralUtils;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
 @RequestMapping("/auth")
+@AllArgsConstructor
 public class AuthController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    TokenProvider tokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final TokenProvider tokenProvider;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -53,7 +41,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ApiResponse registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
             User user = userService.registerNewUser(signUpRequest);
-            return new ApiResponse(true, user.getEmail());
+            return new ApiResponse(user.getEmail());
 
     }
 

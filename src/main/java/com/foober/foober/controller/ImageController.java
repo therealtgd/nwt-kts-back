@@ -3,7 +3,7 @@ package com.foober.foober.controller;
 import com.foober.foober.dto.ApiResponse;
 import com.foober.foober.model.Image;
 import com.foober.foober.service.ImageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,10 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/image")
+@AllArgsConstructor
 public class ImageController {
 
-    @Autowired
-    private ImageService imageService;
+    private final ImageService imageService;
 
     @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ApiResponse upload(@RequestPart("email") String userEmail, @RequestPart("image") MultipartFile image) {
@@ -24,10 +24,10 @@ public class ImageController {
         try {
 
             imageService.save(userEmail, image);
-            return new ApiResponse(true, String.format("File uploaded successfully: %s", image.getOriginalFilename()));
+            return new ApiResponse(String.format("File uploaded successfully: %s", image.getOriginalFilename()));
 
         } catch (Exception e) {
-            return new ApiResponse(false, String.format("Could not upload the file: %s!", image.getOriginalFilename()));
+            return new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Could not upload the file: %s!", image.getOriginalFilename()));
 
         }
 

@@ -40,6 +40,8 @@ public class User implements UserDetails {
     protected String provider;
     @Column(name = "provider_user_id")
     protected String providerUserId;
+    @Column(name = "credits")
+    protected int credits;
 
     @Override
     public boolean isAccountNonExpired() {
@@ -59,5 +61,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public void addCredits(int amount) {
+        this.setCredits(this.credits + amount);
     }
 }
