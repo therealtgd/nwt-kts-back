@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +75,11 @@ public class ControllerAdvisor {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to upload. File is too large.");
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<String> handleSignatureException(SignatureException exc) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to upload. File is too large.");
     }
     @ResponseStatus(HttpStatus.CONFLICT)
