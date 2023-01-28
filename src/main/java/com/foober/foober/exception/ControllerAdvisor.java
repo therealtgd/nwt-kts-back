@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,17 +64,22 @@ public class ControllerAdvisor {
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
-    public ResponseEntity<String> handleInvalidTokenException(OAuth2AuthenticationProcessingException e) {
+    public ResponseEntity<String> handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<String> handleInvalidTokenException(BadRequestException e) {
+    public ResponseEntity<String> handleBadRequestException(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to upload. File is too large.");
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<String> handleSignatureException(SignatureException exc) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unable to upload. File is too large.");
     }
     @ResponseStatus(HttpStatus.CONFLICT)
@@ -93,7 +99,7 @@ public class ControllerAdvisor {
     }
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserIsNotActivatedException.class)
-    public ResponseEntity<String> handleUserAlreadyActivatedException(UserIsNotActivatedException e) {
+    public ResponseEntity<String> handleUserIsNotActivatedException(UserIsNotActivatedException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

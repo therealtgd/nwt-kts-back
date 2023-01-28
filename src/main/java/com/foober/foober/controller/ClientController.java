@@ -1,5 +1,6 @@
 package com.foober.foober.controller;
 
+import com.foober.foober.dto.ApiResponse;
 import com.foober.foober.dto.ClientSignUpRequest;
 import com.foober.foober.dto.ClientSignUpConfirmation;
 import com.foober.foober.service.ClientService;
@@ -22,8 +23,8 @@ public class ClientController {
     ClientService clientService;
 
     @PostMapping("/register/confirm")
-    public ResponseEntity<String> confirmRegistration(@Valid @RequestBody ClientSignUpConfirmation data) {
+    public ApiResponse confirmRegistration(@Valid @RequestBody ClientSignUpConfirmation data) {
         clientService.confirmRegistration(data.getToken());
-        return ResponseEntity.ok("Registration confirmed.");
+        return new ApiResponse(true, "Registration confirmed.");
     }
 }
