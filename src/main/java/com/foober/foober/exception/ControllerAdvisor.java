@@ -64,12 +64,12 @@ public class ControllerAdvisor {
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
-    public ResponseEntity<String> handleInvalidTokenException(OAuth2AuthenticationProcessingException e) {
+    public ResponseEntity<String> handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<String> handleInvalidTokenException(BadRequestException e) {
+    public ResponseEntity<String> handleBadRequestException(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -99,7 +99,7 @@ public class ControllerAdvisor {
     }
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserIsNotActivatedException.class)
-    public ResponseEntity<String> handleUserAlreadyActivatedException(UserIsNotActivatedException e) {
+    public ResponseEntity<String> handleUserIsNotActivatedException(UserIsNotActivatedException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

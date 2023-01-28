@@ -51,14 +51,10 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
-        try {
+    public ApiResponse registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
             User user = userService.registerNewUser(signUpRequest);
-            return ResponseEntity.ok().body(new ApiResponse(true, user.getEmail()));
-        } catch (UserAlreadyExistsException e) {
-            log.error("Exception Ocurred", e);
-            return new ResponseEntity<>(new ApiResponse(false, "Email Address already in use!"), HttpStatus.BAD_REQUEST);
-        }
+            return new ApiResponse(true, user.getEmail());
+
     }
 
 }
