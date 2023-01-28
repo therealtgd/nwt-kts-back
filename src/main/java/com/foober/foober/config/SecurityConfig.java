@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(new RestAuthenticationEntryPoint())
                 .and()
                 .authorizeRequests()
-                .antMatchers("/", "/error", "/all", "/auth/**", "/oauth2/**", "/image/**").permitAll()
+                .antMatchers("/", "/error", "/all", "/auth/**", "/oauth2/**", "/image/**", "/ride/price").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
