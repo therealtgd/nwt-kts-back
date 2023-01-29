@@ -4,10 +4,8 @@ import com.foober.foober.dto.*;
 import com.foober.foober.model.User;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.service.UserService;
-import com.foober.foober.util.GeneralUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,18 +28,17 @@ public class AuthController {
     private final TokenProvider tokenProvider;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ApiResponse<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.createToken(authentication);
-        LocalUser localUser = (LocalUser) authentication.getPrincipal();
-        return ResponseEntity.ok(new AuthResponse(jwt, GeneralUtils.buildUserInfo(localUser)));
+        return new ApiResponse<>(jwt);
     }
 
     @PostMapping("/signup")
-    public ApiResponse registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
+    public ApiResponse<?> registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
             User user = userService.registerNewUser(signUpRequest);
-            return new ApiResponse(user.getEmail());
+            return new ApiResponse<>(user.getEmail());
 
     }
 
