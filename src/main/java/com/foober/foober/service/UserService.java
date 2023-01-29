@@ -1,10 +1,9 @@
 package com.foober.foober.service;
 
-import com.foober.foober.dto.ClientSignUpRequest;
-import com.foober.foober.dto.LocalUser;
-import com.foober.foober.dto.SocialProvider;
+import com.foober.foober.dto.*;
 import com.foober.foober.model.Role;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.foober.foober.exception.*;
@@ -138,12 +137,32 @@ public class UserService {
                 passwordEncoder.encode(formDTO.getPassword()),
                 formDTO.getDisplayName(),
                 roles,
-                formDTO.getPhoneNumber(),
                 // TODO: Add payment info
                 "",
                 formDTO.getSocialProvider().getProviderType(),
                 formDTO.getProviderUserId()
         );
         return client;
+    }
+
+    public void update(UpdateRequest updateRequest, User user) {
+        try {
+            user.setUsername(updateRequest.getUsername());
+            user.setDisplayName(updateRequest.getDisplayName());
+            userRepository.save(user);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new UsernameAlreadyExistsException("Username already exists");
+        }
+    }
+
+    public void updatePassword(PasswordUpdateRequest updateRequest, User user) {
+        try {
+            user.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+            userRepository.save(user);
+        }
+        catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

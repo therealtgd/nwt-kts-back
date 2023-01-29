@@ -14,16 +14,12 @@ public class ClientSignUpRequest {
     private String displayName;
     @NotEmpty
     @Size(min = 2, max = 20)
-    @Pattern(regexp = "[a-zA-Za-šA-Š]*")
+    @Pattern(regexp = "[a-zA-Za-šA-Š0-9]*")
     private String username;
     @NotEmpty
     @Size(min = 2, max = 64)
     @Email
     private String email;
-    @NotEmpty
-    @Size(min = 6, max = 10)
-    @Pattern(regexp = "[0-9]*")
-    private String phoneNumber;
     @NotEmpty
     @Size(min = 6, max = 20)
     @Pattern(regexp = "[a-zA-Za-šA-Š0-9]*")
