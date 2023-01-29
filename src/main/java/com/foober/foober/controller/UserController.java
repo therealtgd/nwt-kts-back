@@ -1,10 +1,7 @@
 package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
-import com.foober.foober.dto.ApiResponse;
-import com.foober.foober.dto.LocalUser;
-import com.foober.foober.dto.UpdateRequest;
-import com.foober.foober.dto.UserInfo;
+import com.foober.foober.dto.*;
 import com.foober.foober.service.UserService;
 import com.foober.foober.util.GeneralUtils;
 import lombok.AllArgsConstructor;
@@ -26,11 +23,16 @@ public class UserController {
     public ResponseEntity<UserInfo> getCurrentUser(@CurrentUser LocalUser user) {
         return ResponseEntity.ok(GeneralUtils.buildUserInfo(user));
     }
-
     @PutMapping("/update")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ApiResponse updateUser(@Valid @RequestBody UpdateRequest updateRequest, @CurrentUser LocalUser user) {
         userService.update(updateRequest, user.getUser());
+        return new ApiResponse(true, "Successfully updated user.");
+    }
+    @PutMapping("/update-password")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ApiResponse updateUserPassword(@Valid @RequestBody PasswordUpdateRequest updateRequest, @CurrentUser LocalUser user) {
+        userService.updatePassword(updateRequest, user.getUser());
         return new ApiResponse(true, "Successfully updated user.");
     }
 }
