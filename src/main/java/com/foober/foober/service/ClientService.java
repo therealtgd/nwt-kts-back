@@ -1,17 +1,14 @@
 package com.foober.foober.service;
 
-import com.foober.foober.security.jwt.TokenProvider;
-import com.foober.foober.dto.ClientSignUpRequest;
-import com.foober.foober.exception.*;
+import com.foober.foober.exception.InvalidTokenException;
+import com.foober.foober.exception.UserAlreadyActivatedException;
 import com.foober.foober.model.Client;
+import com.foober.foober.model.User;
 import com.foober.foober.repos.ClientRepository;
-import com.foober.foober.repos.RoleRepository;
-import com.foober.foober.repos.UserRepository;
+import com.foober.foober.security.jwt.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
 import java.util.NoSuchElementException;
 
 @Service
@@ -39,4 +36,7 @@ public class ClientService {
 
     }
 
+    public int getCreditsBalance(User user) {
+        return user.getCredits();
+    }
 }

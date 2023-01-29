@@ -6,23 +6,20 @@ import com.foober.foober.model.Driver;
 import com.foober.foober.model.Role;
 import com.foober.foober.repos.RoleRepository;
 import com.foober.foober.repos.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
 @Component
+@AllArgsConstructor
 public class TestDataSupplierService implements CommandLineRunner {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public void run(String... args) throws Exception {
@@ -57,6 +54,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         client.setAuthorities(Set.of(roleRepository.findByName("ROLE_CLIENT"), roleRepository.findByName("ROLE_USER")));
         client.setPaymentInfo("");
         client.setPhoneNumber("068419532");
+        client.setCredits(10000000);
         client.setEnabled(true);
         userRepository.save(client);
     }

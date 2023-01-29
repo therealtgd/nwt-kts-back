@@ -37,7 +37,7 @@ public class EmailService {
         helper.setText(buildEmailFromTemplate(variables), true);
         helper.setTo(sendTo);
         helper.setSubject(subject);
-        helper.setFrom("gajba.na.vodi@gmail.com");
+        helper.setFrom("foober.taxi.service@gmail.com");
         mailSender.send(mimeMessage);
 
     }

@@ -17,7 +17,7 @@ public class ClientSignUpRequest {
     @Pattern(regexp = "[a-zA-Za-šA-Š]*")
     private String username;
     @NotEmpty
-    @Size(min = 2, max = 30)
+    @Size(min = 2, max = 64)
     @Email
     private String email;
     @NotEmpty
