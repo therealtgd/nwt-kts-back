@@ -32,6 +32,13 @@ public class ApiResponse<T> {
         this.message = "";
     }
 
+    public ApiResponse(HttpStatus status) {
+        this.success = status.value() >= 200 && status.value() < 300;
+        this.status = status;
+        this.message = null;
+        this.body = null;
+    }
+
     public HttpStatusDto getStatus() {
         return new HttpStatusDto(status.value(), status.name());
     }

@@ -19,12 +19,14 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ApiResponse upload(@RequestPart("email") String userEmail, @RequestPart("image") MultipartFile image) {
+    public ApiResponse<String> upload(@RequestPart("email") String userEmail,
+                                     @RequestPart("image") MultipartFile image) {
         try {
             imageService.save(userEmail, image);
-            return new ApiResponse(String.format("File uploaded successfully: %s", image.getOriginalFilename()));
+            return new ApiResponse<>(String.format("File uploaded successfully: %s", image.getOriginalFilename()));
         } catch (Exception e) {
-            return new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Could not upload the file: %s!", image.getOriginalFilename()));
+            return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Could not upload the file: %s!",
+                image.getOriginalFilename()));
         }
     }
 
