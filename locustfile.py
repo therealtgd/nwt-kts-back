@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from random import randrange
+from random import randrange, choice
 from typing import Any
+from enum import Enum
 
 import googlemaps
 from locust import HttpUser, between, task
@@ -106,29 +107,41 @@ with open('maps_api.key', 'r') as f:
 
 gmaps = googlemaps.Client(key=Globals.GOOGLE_MAPS_API_KEY)
 
+class DriverStatus(Enum):
+    AVAILABLE = 0
+    BUSY = 1
+
 class QuickstartUser(HttpUser):
     host = 'http://localhost:8080'
     wait_time = between(0.5, 2)
 
     def on_start(self):
-        # Login
         token = self.client.post('/auth/signin', json=Globals.users_creds.pop(0).__dict__).json()
         self.auth_header = {
             'Authorization': f'Bearer {token["message"]}',
             'Content-Type': 'application/json',
         }
 
-        driver_json = self.client.get('/driver', headers=self.auth_header).json()
-        self.driver = Driver.fromJson(driver_json['body'])
+        self.get_driver()
 
-        self.driving_to_start_point = True
+        self.waypoints: list[LatLng] = []
+
+        self.driving_to_start_point = False
         self.driving_the_route = False
         self.driving_to_taxi_stop = False
 
         self.departure = self.driver.vehicle.position
-        self.destination = Globals.locations.pop(randrange(0, len(Globals.locations)))
         
-        self.waypoints: list[LatLng] = []
+        self.status = choice(list(DriverStatus))
+        if self.status == DriverStatus.AVAILABLE:
+            self.driving_to_taxi_stop = True
+            self.client.put('/ride/1/end', headers=self.auth_header)
+            self.destination = Globals.taxi_stops[randrange(0, len(Globals.taxi_stops))]
+        else:
+            self.driving_to_start_point = True
+            self.client.put('/ride/1/start', headers=self.auth_header)
+            self.destination = Globals.locations.pop(randrange(0, len(Globals.locations)))
+            
         self.get_new_coordinates()
 
     @task
@@ -148,7 +161,11 @@ class QuickstartUser(HttpUser):
                     self.destination = Globals.locations.pop(randrange(0, len(Globals.locations)))
                 
                 self.get_new_coordinates()
+                # TODO: call '/ride/1/start' or something like that
+                # and change RideStatus to IN_PROGRESS 
                 self.driving_the_route = True
+                print(f'{self.driver.username} driving the route.')
+
 
             elif self.driving_the_route:
                 self.driving_the_route = False
@@ -158,7 +175,11 @@ class QuickstartUser(HttpUser):
                 self.destination = Globals.taxi_stops[randrange(0, len(Globals.taxi_stops))]
                 
                 self.get_new_coordinates()
+                self.client.put('/ride/1/end', headers=self.auth_header)
+                self.get_driver()
                 self.driving_to_taxi_stop = True
+                print(f'{self.driver.username} driving to taxi stop.')
+
 
             elif self.driving_to_taxi_stop:
                 self.driving_to_taxi_stop = False
@@ -168,7 +189,10 @@ class QuickstartUser(HttpUser):
                 self.destination = Globals.locations.pop(randrange(0, len(Globals.locations)))
 
                 self.get_new_coordinates()
+                self.client.put('/ride/1/accept', headers=self.auth_header)
+                self.get_driver()
                 self.driving_to_start_point = True
+                print(f'{self.driver.username} driving to start point.')
 
     def get_new_coordinates(self):
         directions = gmaps.directions(self.departure.tuple, self.destination.tuple)
@@ -176,3 +200,7 @@ class QuickstartUser(HttpUser):
             for step in leg['steps']:
                 for point in googlemaps.convert.decode_polyline(step['polyline']['points']):
                     self.waypoints.append(LatLng.fromJson(point))
+
+    def get_driver(self):
+        driver_json = self.client.get('/driver', headers=self.auth_header).json()
+        self.driver = Driver.fromJson(driver_json['body'])

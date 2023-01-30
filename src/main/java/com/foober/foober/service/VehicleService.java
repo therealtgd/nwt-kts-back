@@ -8,6 +8,7 @@ import com.foober.foober.repos.VehicleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class VehicleService {
             .orElseThrow(() -> new ResourceNotFoundException("Vehicle doesn't exist."));
     }
 
+    @Transactional
     public void updateVehicleLocation(Long id, LatLng latlng) throws ResourceNotFoundException {
         Vehicle vehicle = this.vehicleRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Vehicle doesn't exist."));

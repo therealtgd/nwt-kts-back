@@ -25,7 +25,6 @@ public class VehicleController {
 
     @PutMapping(path = "/update/{id}/position")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
-
     public ApiResponse<LatLng> updateVehicleLocation(@PathVariable("id") Long id, @RequestBody LatLng latlng) {
         this.vehicleService.updateVehicleLocation(id, latlng);
         this.simpMessagingTemplate.convertAndSend(

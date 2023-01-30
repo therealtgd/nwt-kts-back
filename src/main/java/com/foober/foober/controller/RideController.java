@@ -1,14 +1,18 @@
 package com.foober.foober.controller;
 
+import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.ApiResponse;
+import com.foober.foober.dto.LocalUser;
+import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.service.DriverService;
 import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.transaction.Transactional;
 
 @RestController
 @RequestMapping(value = "/ride" ,produces = MediaType.APPLICATION_JSON_VALUE)
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RideController {
 
     private final RideService rideService;
+    private final DriverService driverService;
 
     @GetMapping("/price")
     public ApiResponse<Integer> getPrice(
@@ -31,4 +36,20 @@ public class RideController {
         }
     }
 
+    @PutMapping("/{id}/accept")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public ApiResponse<?> acceptRide(@CurrentUser LocalUser user, @PathVariable("id") String id) {
+        this.driverService.updateStatus(user.getUser().getId(), DriverStatus.BUSY);
+        // TODO: Set ride status to ON_ROUTE
+        return new ApiResponse<>(HttpStatus.OK);
+    }
+
+    @Transactional
+    @PutMapping("/{id}/end")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public ApiResponse<?> endRide(@CurrentUser LocalUser user, @PathVariable("id") String id) {
+        this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);
+        // TODO: Set ride status to FINISHED
+        return new ApiResponse<>(HttpStatus.OK);
+    }
 }
