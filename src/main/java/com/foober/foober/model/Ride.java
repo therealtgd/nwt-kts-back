@@ -5,13 +5,14 @@ import javax.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "Ride")
+@Table(name = "ride")
 public class Ride {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,8 +20,7 @@ public class Ride {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id")
     private Set<Address> route;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "client_id")
+    @ManyToMany(mappedBy = "rides", fetch = FetchType.LAZY)
     private Set<Client> clients;
     @Column(nullable = false)
     private double price;
@@ -37,7 +37,6 @@ public class Ride {
     private Long endTime;
 
     public Ride(Set<Address> route,
-                Set<Client> clients,
                 double price,
                 double distance,
                 RideStatus status,
@@ -45,12 +44,16 @@ public class Ride {
                 Long startTime,
                 Long endTime) {
         this.route = route;
-        this.clients = clients;
+        this.clients = new HashSet<>();
         this.price = price;
         this.distance = distance;
         this.status = status;
         this.driver = driver;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+    public void addClient(Client client) {
+        clients.add(client);
+        client.getRides().add(this);
     }
 }

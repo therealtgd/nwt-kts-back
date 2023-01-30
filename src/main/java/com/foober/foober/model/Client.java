@@ -5,13 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "Client")
+@Table(name = "client")
 public class Client extends User {
 
     @Column(name="phone_number", columnDefinition = "TEXT")
@@ -20,6 +21,12 @@ public class Client extends User {
     private boolean isActivated;
     @Column(name="payment_info", nullable = false, columnDefinition = "TEXT")
     private String paymentInfo;
+    @ManyToMany
+    @JoinTable(
+            name = "client_ride",
+            joinColumns = @JoinColumn(name = "client_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "ride_id", referencedColumnName = "id"))
+    private Set<Ride> rides = new HashSet<>();
 
     public Client(String username,
                   String email,

@@ -17,10 +17,12 @@ public class Address {
     private Long id;
     private double latitude;
     private double longitude;
+    private int station;
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
     private String streetAddress;
 
-    public Address(double latitude, double longitude, String streetAddress) {
+    public Address(int station, double latitude, double longitude, String streetAddress) {
+        this.station = station;
         this.latitude = latitude;
         this.longitude = longitude;
         this.streetAddress = streetAddress;

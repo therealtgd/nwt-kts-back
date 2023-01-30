@@ -2,10 +2,9 @@ package com.foober.foober.service;
 
 import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
-import com.foober.foober.repos.RoleRepository;
-import com.foober.foober.repos.UserRepository;
-import com.foober.foober.repos.VehicleRepository;
+import com.foober.foober.repos.*;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,12 +19,33 @@ public class TestDataSupplierService implements CommandLineRunner {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final VehicleRepository vehicleRepository;
+    private final RideRepository rideRepository;
+    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public void run(String... args) throws Exception {
         initializeRoles();
         initializeUsers();
+        initializeRides();
+    }
+
+    private void initializeRides() {
+        Client client = (Client) userRepository.findByUsername("client").orElseThrow();
+        Ride ride = new Ride(
+                Set.of(new Address(1, 0, 0, "Puskinova 28"),
+                       new Address(2, 0, 0, "Gogoljeva 22")),
+                3.5,
+                1.82,
+                RideStatus.COMPLETED,
+                (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 15 * 1000,
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000
+                );
+        ride.addClient(client);
+        ride = rideRepository.save(ride);
+        addressRepository.saveAll(ride.getRoute());
+        userRepository.save(client);
     }
 
     private void initializeUsers() {

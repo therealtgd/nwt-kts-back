@@ -18,7 +18,7 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mySeqGenV1")
     private Long id;
 
-    @Column(name = "filename", nullable = false, unique = true)
+    @Column(name = "filename", nullable = false)
     private String filename;
 
     private String contentType;

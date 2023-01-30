@@ -5,6 +5,9 @@ import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -14,4 +17,6 @@ public class Driver extends User {
     private DriverStatus status;
     @OneToOne(fetch = FetchType.LAZY)
     private Vehicle vehicle;
+    @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
+    private Set<Ride> rides = new HashSet<>();
 }

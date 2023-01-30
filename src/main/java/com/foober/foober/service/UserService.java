@@ -1,14 +1,12 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.*;
-import com.foober.foober.model.Role;
+import com.foober.foober.model.*;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.foober.foober.exception.*;
-import com.foober.foober.model.Client;
-import com.foober.foober.model.User;
 import com.foober.foober.repos.RoleRepository;
 import com.foober.foober.repos.UserRepository;
 import com.foober.foober.security.jwt.TokenProvider;
@@ -19,14 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
