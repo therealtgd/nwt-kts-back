@@ -1,13 +1,14 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.VehicleType;
-import javax.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.UUID;
+import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "Vehicle")
@@ -23,6 +24,11 @@ public class Vehicle {
     private boolean petsAllowed;
     @Column(name="babies_allowed", nullable = false)
     private boolean babiesAllowed;
+    @Column(name="latitude")
+    private Double latitude;
+    @Column(name="longitude")
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     private VehicleType type;
 
