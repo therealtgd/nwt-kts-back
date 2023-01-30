@@ -51,3 +51,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+__pycache__/
+maps_api.key
