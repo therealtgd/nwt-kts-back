@@ -23,7 +23,19 @@ Type this command in terminal to install dependencies:
 ```sh
 pip install locust googlemaps
 ```
-Use of virtual envorionment is recommended.
+Use of virtual environment is recommended.
+
+Creating a virtual environment in Linux and macOS:
+```shell
+   python3 -m venv venv
+   source venv/bin/activate
+```
+
+Creating a virtual environment in Windows:
+```shell
+  python -m venv venv
+  venv\Scripts\activate
+```
 
 ### Running driver simulation
 To run the simulation and see results follow these steps:

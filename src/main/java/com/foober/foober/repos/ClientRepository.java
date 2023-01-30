@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByUsername(String subject);
+
 }

@@ -28,7 +28,7 @@ public class DriverController {
 
     @GetMapping
     public ApiResponse<DriverDto> getDriver(@CurrentUser LocalUser user) {
-        return new ApiResponse<>(this.driverService.getDriverDto(user.getUser().getId()));
+        return new ApiResponse<>(this.driverService.getCompatibleDriverDto(user.getUser().getId()));
     }
     @GetMapping(path = "/get-all-active")
     public ApiResponse<List<DriverDto>> getActiveDrivers() {
