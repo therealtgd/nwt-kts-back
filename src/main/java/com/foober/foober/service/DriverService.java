@@ -5,11 +5,13 @@ import com.foober.foober.dto.RideBriefDisplay;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.User;
 import com.foober.foober.model.enumeration.RideStatus;
+import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.repos.DriverRepository;
 import com.foober.foober.util.DtoConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,5 +40,12 @@ public class DriverService {
         Set<RideBriefDisplay> rides = new HashSet<>();
         driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride)));
         return rides;
+    }
+    
+    @Transactional
+    public void updateStatus(Long driver_id, DriverStatus status) {
+        Driver driver = this.driverRepository.getById(driver_id);
+        driver.setStatus(status);
+        this.driverRepository.save(driver);
     }
 }
