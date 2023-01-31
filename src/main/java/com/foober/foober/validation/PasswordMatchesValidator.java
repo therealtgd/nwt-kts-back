@@ -1,6 +1,7 @@
 package com.foober.foober.validation;
 
 import com.foober.foober.dto.ClientSignUpRequest;
+import com.foober.foober.dto.PasswordResetRequest;
 import com.foober.foober.dto.PasswordUpdateRequest;
 
 import javax.validation.ConstraintValidator;
@@ -14,6 +15,9 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
 			return passwordsMatch(dto.getPassword(), dto.getConfirmPassword());
 		}
 		else if (obj instanceof PasswordUpdateRequest dto) {
+			return passwordsMatch(dto.getPassword(), dto.getConfirmPassword());
+		}
+		else if (obj instanceof PasswordResetRequest dto) {
 			return passwordsMatch(dto.getPassword(), dto.getConfirmPassword());
 		}
 		return false;

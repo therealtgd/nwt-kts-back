@@ -13,11 +13,9 @@ import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfo;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfoFactory;
 import com.foober.foober.util.GeneralUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.mail.MessagingException;
@@ -161,4 +159,38 @@ public class UserService {
             throw new BadRequestException(e.getMessage());
         }
     }
+
+    public void sendPasswordResetEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User with that email doesn't exist.");
+        }
+        else if (!user.get().isEnabled()) {
+            throw new UserIsNotActivatedException("User with that email doesn't exist.");
+        }
+        String token = tokenUtils.generateConfirmationToken(user.get());
+        try {
+            emailService.sendPasswordResetEmail(user.get(), token);
+        } catch (MessagingException e) {
+            throw new EmailNotSentException("Email failed to send.");
+        } catch (IOException e) {
+            throw new ResourceNotFoundException("Email template was not found.");
+        }
+    }
+
+    public void resetPassword(PasswordResetRequest resetRequest) {
+        try {
+            tokenUtils.validateToken(resetRequest.getToken());
+            User user = userRepository.findById(tokenUtils.getUserIdFromToken(resetRequest.getToken())).orElseThrow();
+            user.setPassword(passwordEncoder.encode(resetRequest.getPassword()));
+            userRepository.save(user);
+        } catch (NoSuchElementException e) {
+            throw new InvalidTokenException("Token is invalid");
+        } catch (TokenExpiredException e) {
+            throw new TokenExpiredException("Link had expired");
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+    
 }

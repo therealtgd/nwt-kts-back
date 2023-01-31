@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.foober.foober.config.AppProperties;
 import com.foober.foober.dto.LocalUser;
+import com.foober.foober.exception.TokenExpiredException;
 import com.foober.foober.model.User;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ public class TokenProvider {
             logger.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
             logger.error("Expired JWT token");
+            throw new TokenExpiredException();
         } catch (UnsupportedJwtException ex) {
             logger.error("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
