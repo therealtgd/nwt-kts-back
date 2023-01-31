@@ -22,5 +22,13 @@ public class UpdateRequest {
     @Size(min = 2, max = 20)
     @Pattern(regexp = "[a-zA-Za-šA-Š0-9]*")
     private String username;
+    @NotEmpty
+    @Size(min = 9, max = 10)
+    @Pattern(regexp = "[0-9]*")
+    private String phoneNumber;
+    @NotEmpty
+    @Size(min = 3, max = 25)
+    @Pattern(regexp = "[a-zA-Za-šA-Š\s]*")
+    private String city;
 
 }

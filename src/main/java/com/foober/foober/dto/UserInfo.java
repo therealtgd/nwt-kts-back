@@ -11,4 +11,6 @@ public class UserInfo {
     private String username;
     private String email;
     private String role;
+    private String phoneNumber;
+    private String City;
 }

@@ -130,6 +130,8 @@ public class UserService {
                 formDTO.getEmail(),
                 passwordEncoder.encode(formDTO.getPassword()),
                 formDTO.getDisplayName(),
+                formDTO.getPhoneNumber(),
+                formDTO.getCity(),
                 roles,
                 // TODO: Add payment info
                 "",
@@ -143,6 +145,8 @@ public class UserService {
         try {
             user.setUsername(updateRequest.getUsername());
             user.setDisplayName(updateRequest.getDisplayName());
+            user.setCity(updateRequest.getCity());
+            user.setPhoneNumber(updateRequest.getPhoneNumber());
             userRepository.save(user);
         }
         catch (DataIntegrityViolationException e) {
