@@ -32,6 +32,11 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ApiResponse<?> updateUserPassword(@Valid @RequestBody PasswordUpdateRequest updateRequest, @CurrentUser LocalUser user) {
         userService.updatePassword(updateRequest, user.getUser());
-        return new ApiResponse<>(HttpStatus.OK, "Successfully updated user.");
+        return new ApiResponse<>(HttpStatus.OK, "Successfully updated password.");
+    }
+    @PostMapping("/forgot-password")
+    public ApiResponse<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest resetRequest) {
+        userService.sendPasswordResetEmail(resetRequest.getEmail());
+        return new ApiResponse<>(HttpStatus.OK, "Successfully sent the request. Link you receive in the email will expire in 15 minutes.");
     }
 }

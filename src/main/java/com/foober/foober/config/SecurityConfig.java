@@ -71,7 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     "/ride/price",
                     "/client/register/confirm",
                     "/socket/**",
-                    "/driver/get-all-active"
+                    "/driver/get-all-active",
+                    "/user/forgot-password",
+                    "/user/reset-password"
                 ).permitAll()
                 .anyRequest()
                 .authenticated()

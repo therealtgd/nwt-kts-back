@@ -3,6 +3,7 @@ package com.foober.foober.service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.foober.foober.model.Client;
+import com.foober.foober.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -27,14 +28,22 @@ public class EmailService {
         variables.put("name", client.getDisplayName());
         variables.put("link", "http://localhost:4200/confirm-registration/" + token);
 
-        sendEmail(variables, "Registration Confirmation", client.getEmail());
+        sendEmail(variables, "Registration Confirmation", client.getEmail(), "emailTemplates/clientRegistration.html");
+    }
+    @Async
+    public void sendPasswordResetEmail(User user, String token) throws MessagingException, IOException {
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("name", user.getDisplayName());
+        variables.put("link", "http://localhost:4200/reset-password/" + token);
+
+        sendEmail(variables, "Reset your password", user.getEmail(), "emailTemplates/forgotPassword.html");
     }
 
-    private void sendEmail(HashMap<String, String> variables, String subject, String sendTo) throws MessagingException, IOException {
+    private void sendEmail(HashMap<String, String> variables, String subject, String sendTo, String template) throws MessagingException, IOException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-        helper.setText(buildEmailFromTemplate(variables), true);
+        helper.setText(buildEmailFromTemplate(variables, template), true);
         helper.setTo(sendTo);
         helper.setSubject(subject);
         helper.setFrom("foober.taxi.service@gmail.com");
@@ -42,8 +51,8 @@ public class EmailService {
 
     }
 
-    private String buildEmailFromTemplate(HashMap<String, String> variables) throws IOException {
-        String message = getResourceFileAsString("emailTemplates/clientRegistration.html");
+    private String buildEmailFromTemplate(HashMap<String, String> variables, String template) throws IOException {
+        String message = getResourceFileAsString(template);
 
         String target;
         String value;
@@ -62,7 +71,7 @@ public class EmailService {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             return (String)reader.lines().collect(Collectors.joining(System.lineSeparator()));
         } else {
-            throw new RuntimeException("resource not found");
+            throw new RuntimeException("Resource not found.");
         }
     }
 

@@ -32,12 +32,12 @@ public class ControllerAdvisor {
             errors.put(objectName, errorMessage);
         });
 
-        return new ApiResponse<>(HttpStatus.BAD_REQUEST, "Field validation failed.");
+        return new ApiResponse<String>(HttpStatus.BAD_REQUEST, "Field validation failed.");
     }
     @ResponseStatus(HttpStatus.GONE)
-    @ExceptionHandler(ConfirmationLinkExpiredException.class)
-    public ApiResponse<?> handleConfirmationLinkExpiredException(ConfirmationLinkExpiredException e) {
-        return new ApiResponse<>(HttpStatus.GONE, e.getMessage());
+    @ExceptionHandler(TokenExpiredException.class)
+    public ApiResponse<?> handleTokenExpiredException(TokenExpiredException e) {
+        return new ApiResponse<>(HttpStatus.GONE, "Link has expired.");
     }
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(EmailNotSentException.class)
@@ -72,7 +72,7 @@ public class ControllerAdvisor {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
     public ApiResponse<?> handleBadRequestException(BadRequestException e) {
-        return new ApiResponse<>(HttpStatus.BAD_REQUEST, e.getMessage());
+        return new ApiResponse<>(HttpStatus.BAD_REQUEST, "An error had occurred.");
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
