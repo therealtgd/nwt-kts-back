@@ -55,6 +55,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         admin.setEmail("admin@gmail.com");
         admin.setPassword(passwordEncoder.encode("admin"));
         admin.setDisplayName("Ana Andjelic");
+        admin.setPhoneNumber("000000000");
+        admin.setCity("Novi Sad");
         admin.setAuthorities(Set.of(roleRepository.findByName("ROLE_ADMIN"), roleRepository.findByName("ROLE_USER")));
         userRepository.save(admin);
 
@@ -64,6 +66,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         driver.setEmail("driver@gmail.com");
         driver.setPassword(passwordEncoder.encode("driver"));
         driver.setDisplayName("Nikola Damjanovic");
+        driver.setPhoneNumber("000000000");
+        driver.setCity("Novi Sad");
         driver.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
         driver.setStatus(DriverStatus.AVAILABLE);
         Vehicle vehicle = new Vehicle("BEII END", 3, false, false, VehicleType.SEDAN);
@@ -79,6 +83,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_1.setEmail("driver1@gmail.com");
         test_driver_1.setPassword(passwordEncoder.encode("driver"));
         test_driver_1.setDisplayName("Test Driver");
+        test_driver_1.setPhoneNumber("000000000");
+        test_driver_1.setCity("Novi Sad");
         test_driver_1.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
         test_driver_1.setStatus(DriverStatus.AVAILABLE);
         Vehicle test_vehicle_1 = new Vehicle("SWAGGER", 5, false, true, VehicleType.SEDAN);
@@ -94,6 +100,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_2.setEmail("driver2@gmail.com");
         test_driver_2.setPassword(passwordEncoder.encode("driver"));
         test_driver_2.setDisplayName("Test Driver");
+        test_driver_2.setPhoneNumber("000000000");
+        test_driver_2.setCity("Novi Sad");
         test_driver_2.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
         test_driver_2.setStatus(DriverStatus.AVAILABLE);
         Vehicle test_vehicle_2 = new Vehicle("SHAEK", 4, true, false, VehicleType.WAGON);
@@ -109,6 +117,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_3.setEmail("driver3@gmail.com");
         test_driver_3.setPassword(passwordEncoder.encode("driver"));
         test_driver_3.setDisplayName("Test Driver");
+        test_driver_3.setPhoneNumber("000000000");
+        test_driver_3.setCity("Novi Sad");
         test_driver_3.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
         test_driver_3.setStatus(DriverStatus.AVAILABLE);
         Vehicle test_vehicle_3 = new Vehicle("FREEDOT", 4, true, true, VehicleType.SEDAN);
@@ -124,6 +134,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         client.setEmail("client@gmail.com");
         client.setPassword(passwordEncoder.encode("client"));
         client.setDisplayName("Vladan Mikic");
+        client.setPhoneNumber("000000000");
+        client.setCity("Novi Sad");
         client.setAuthorities(Set.of(roleRepository.findByName("ROLE_CLIENT"), roleRepository.findByName("ROLE_USER")));
         client.setPaymentInfo("");
         client.setPhoneNumber("068419532");

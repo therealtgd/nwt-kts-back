@@ -44,7 +44,7 @@ public class GeneralUtils {
         String image = TEMPLATE_IMAGE;
         if (user.getImage() != null)
             image = Base64.encodeBase64String(user.getImage().getData());
-        return new UserInfo(image, user.getDisplayName(), user.getUsername(), user.getEmail(), roles.get(0));
+        return new UserInfo(image, user.getDisplayName(), user.getUsername(), user.getEmail(), roles.get(0), user.getPhoneNumber(), user.getCity());
     }
 
 }
