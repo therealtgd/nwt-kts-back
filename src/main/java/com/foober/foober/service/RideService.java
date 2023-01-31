@@ -2,8 +2,12 @@ package com.foober.foober.service;
 
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.model.Address;
+import com.foober.foober.model.Client;
+import com.foober.foober.model.Driver;
 import com.foober.foober.model.Ride;
 import com.foober.foober.model.enumeration.VehicleType;
+import com.foober.foober.repos.ClientRepository;
+import com.foober.foober.repos.DriverRepository;
 import com.foober.foober.repos.RideRepository;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.DistanceMatrixApiRequest;
@@ -11,13 +15,10 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.TravelMode;
 import com.google.maps.model.Unit;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RideService {
@@ -26,9 +27,13 @@ public class RideService {
     @Value("${google.maps.api.key}")
     private String googleMapsApiKey;
     private final RideRepository rideRepository;
+    private final DriverRepository driverRepository;
+    private final ClientRepository clientRepository;
 
-    public RideService(RideRepository rideRepository) {
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository) {
         this.rideRepository = rideRepository;
+        this.driverRepository = driverRepository;
+        this.clientRepository = clientRepository;
     }
 
     public int getPrice(String vehicleType, int distance) throws IllegalArgumentException {
@@ -70,10 +75,21 @@ public class RideService {
             rideList = rides.get();
         }
         return rideList;
-    };
+    }
 
     public void orderRide(RideInfoDto rideInfoDto) {
-        // TODO: Implement ride ordering
+        Driver driver = driverRepository.getById(rideInfoDto.getDriver().getId());
+        Set<Client> clients = clientRepository.findUsersByUsernames(rideInfoDto.getClients());
+        Set<Address> route = new HashSet<>();
+        route.add(new Address(rideInfoDto.getStartAddress(), 0));
+        route.addAll(rideInfoDto.getStops().stream()
+                .map((a) -> new Address(a, route.size()))
+                .toList()
+        );
+        route.add(new Address(rideInfoDto.getEndAddress(), route.size()));
+        Ride ride = new Ride(driver, clients, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
+        rideRepository.save(ride);
+        // TODO: Send notification to Driver
     }
 
     private long getTimeLeftOnRoute(double originLatitude, double originLongitude, double destinationLatitude, double destinationLongitude) throws Exception {

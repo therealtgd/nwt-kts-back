@@ -2,6 +2,7 @@ package com.foober.foober.service;
 
 import com.foober.foober.dto.DriverDto;
 import com.foober.foober.dto.RideBriefDisplay;
+import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.User;
 import com.foober.foober.model.enumeration.RideStatus;
@@ -54,7 +55,7 @@ public class DriverService {
         this.driverRepository.save(driver);
     }
 
-    public DriverDto getNearestFreeDriver(
+    public SimpleDriverDto getNearestFreeDriver(
         String vehicleType,
         boolean petsAllowed,
         boolean babiesAllowed,
@@ -64,26 +65,26 @@ public class DriverService {
         Optional<List<Driver>> drivers = driverRepository.findNearestFreeDriver(
                 Enum.valueOf(VehicleType.class, vehicleType), petsAllowed, babiesAllowed, lat, lng
         );
-        DriverDto driverDto = null;
+        SimpleDriverDto simpleDriverDto = null;
         if (drivers.isPresent() && !drivers.get().isEmpty()) {
-            driverDto = new DriverDto(drivers.get().get(0));
+            simpleDriverDto = new SimpleDriverDto(drivers.get().get(0));
         } else {
             List<Ride> rides = rideService.getRidesNearestToEnd();
             if (!rides.isEmpty()) {
-                driverDto = getCompatibleDriverDto(vehicleType, petsAllowed, babiesAllowed, rides);
+                simpleDriverDto = getCompatibleDriverDto(vehicleType, petsAllowed, babiesAllowed, rides);
             }
         }
-        return driverDto;
+        return simpleDriverDto;
     }
 
-    private static DriverDto getCompatibleDriverDto(String vehicleType, boolean petsAllowed, boolean babiesAllowed, List<Ride> rides) {
+    private static SimpleDriverDto getCompatibleDriverDto(String vehicleType, boolean petsAllowed, boolean babiesAllowed, List<Ride> rides) {
         for (Ride r : rides) {
             Vehicle vehicle = r.getDriver().getVehicle();
             if (vehicle.getType() == Enum.valueOf(VehicleType.class, vehicleType)
                 && (!petsAllowed || vehicle.isPetsAllowed())
                 && (!babiesAllowed || vehicle.isBabiesAllowed())
             ) {
-                return new DriverDto(r.getDriver());
+                return new SimpleDriverDto(r.getDriver());
             }
         }
         return null;

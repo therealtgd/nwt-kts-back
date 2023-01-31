@@ -2,9 +2,9 @@ package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.LocalUser;
+import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.dto.ApiResponse;
-import com.foober.foober.dto.DriverDto;
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.service.DriverService;
 import com.foober.foober.service.RideService;
@@ -56,24 +56,20 @@ public class RideController {
     }
 
     @GetMapping("/nearest-free-driver")
-    public ApiResponse<DriverDto> getNearestFreeDriver(
+    public ApiResponse<SimpleDriverDto> getNearestFreeDriver(
             @RequestParam(value="vehicleType") String vehicleType,
             @RequestParam(value="petsAllowed") boolean petsAllowed,
             @RequestParam(value="babiesAllowed") boolean babiesAllowed,
             @RequestParam(value="lat") double lat,
             @RequestParam(value="lng") double lng
     ) {
-        try {
-            return new ApiResponse<>(driverService.getNearestFreeDriver(vehicleType, petsAllowed, babiesAllowed, lat, lng));
-        } catch (Exception e) {
-            return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+        return new ApiResponse<>(driverService.getNearestFreeDriver(vehicleType, petsAllowed, babiesAllowed, lat, lng));
     }
 
     @PostMapping("/order")
     public ApiResponse<Object> orderRide(@RequestBody RideInfoDto rideInfoDto) {
-//        this.rideService.orderRide(rideInfoDto);
-        return null;
+        this.rideService.orderRide(rideInfoDto);
+        return new ApiResponse<>(HttpStatus.OK);
     }
 
 }

@@ -96,7 +96,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_2.setDisplayName("Test Driver");
         test_driver_2.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
         test_driver_2.setStatus(DriverStatus.AVAILABLE);
-        Vehicle test_vehicle_2 = new Vehicle("SHAEK", 4, true, false, VehicleType.CARAVAN);
+        Vehicle test_vehicle_2 = new Vehicle("SHAEK", 4, true, false, VehicleType.WAGON);
         test_vehicle_2.setLatitude(45.26476693594242);
         test_vehicle_2.setLongitude(19.83119512705716);
         test_driver_2.setVehicle(test_vehicle_2);
