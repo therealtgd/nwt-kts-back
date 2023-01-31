@@ -39,4 +39,9 @@ public class UserController {
         userService.sendPasswordResetEmail(resetRequest.getEmail());
         return new ApiResponse<>(HttpStatus.OK, "Successfully sent the request. Link you receive in the email will expire in 15 minutes.");
     }
+    @PutMapping("/reset-password")
+    public ApiResponse<?> resetUserPassword(@Valid @RequestBody PasswordResetRequest resetRequest) {
+        userService.resetPassword(resetRequest);
+        return new ApiResponse<>(HttpStatus.OK, "Successfully updated password.");
+    }
 }

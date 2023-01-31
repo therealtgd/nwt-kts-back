@@ -178,4 +178,19 @@ public class UserService {
         }
     }
 
+    public void resetPassword(PasswordResetRequest resetRequest) {
+        try {
+            tokenUtils.validateToken(resetRequest.getToken());
+            User user = userRepository.findById(tokenUtils.getUserIdFromToken(resetRequest.getToken())).orElseThrow();
+            user.setPassword(passwordEncoder.encode(resetRequest.getPassword()));
+            userRepository.save(user);
+        } catch (NoSuchElementException e) {
+            throw new InvalidTokenException("Token is invalid");
+        } catch (TokenExpiredException e) {
+            throw new TokenExpiredException("Link had expired");
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+    
 }
