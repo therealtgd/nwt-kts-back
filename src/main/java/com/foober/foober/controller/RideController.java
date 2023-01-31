@@ -1,9 +1,11 @@
 package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
-import com.foober.foober.dto.ApiResponse;
 import com.foober.foober.dto.LocalUser;
+import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.dto.ApiResponse;
+import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.service.DriverService;
 import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
@@ -52,4 +54,22 @@ public class RideController {
         // TODO: Set ride status to FINISHED
         return new ApiResponse<>(HttpStatus.OK);
     }
+
+    @GetMapping("/nearest-free-driver")
+    public ApiResponse<SimpleDriverDto> getNearestFreeDriver(
+            @RequestParam(value="vehicleType") String vehicleType,
+            @RequestParam(value="petsAllowed") boolean petsAllowed,
+            @RequestParam(value="babiesAllowed") boolean babiesAllowed,
+            @RequestParam(value="lat") double lat,
+            @RequestParam(value="lng") double lng
+    ) {
+        return new ApiResponse<>(driverService.getNearestFreeDriver(vehicleType, petsAllowed, babiesAllowed, lat, lng));
+    }
+
+    @PostMapping("/order")
+    public ApiResponse<Object> orderRide(@RequestBody RideInfoDto rideInfoDto) {
+        this.rideService.orderRide(rideInfoDto);
+        return new ApiResponse<>(HttpStatus.OK);
+    }
+
 }

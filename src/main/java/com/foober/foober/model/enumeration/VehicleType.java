@@ -2,7 +2,7 @@ package com.foober.foober.model.enumeration;
 
 public enum VehicleType {
     SEDAN(140),
-    CARAVAN(180);
+    WAGON(180);
 
     private final int price;
 

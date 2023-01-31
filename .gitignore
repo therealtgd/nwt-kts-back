@@ -41,6 +41,9 @@ HELP.md
 *.iml
 *.ipr
 
+### macOS ###
+.DS_Store
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -54,3 +57,4 @@ build/
 
 __pycache__/
 maps_api.key
+venv/**

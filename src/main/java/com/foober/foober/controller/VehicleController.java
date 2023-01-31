@@ -3,6 +3,7 @@ package com.foober.foober.controller;
 import com.foober.foober.dto.ApiResponse;
 import com.foober.foober.dto.LatLng;
 import com.foober.foober.dto.VehicleDto;
+import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.service.VehicleService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
@@ -37,5 +38,10 @@ public class VehicleController {
     @GetMapping(path = "/get-all")
     public ApiResponse<List<VehicleDto>> getAllVehicles() {
         return new ApiResponse<>(this.vehicleService.getAllVehicleDtos());
+    }
+
+    @GetMapping(path = "/types")
+    public ApiResponse<VehicleType[]> getAllVehicleTypes() {
+        return new ApiResponse<>(this.vehicleService.getAllVehicleTypes());
     }
 }

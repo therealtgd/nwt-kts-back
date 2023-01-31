@@ -4,6 +4,7 @@ import com.foober.foober.dto.LatLng;
 import com.foober.foober.dto.VehicleDto;
 import com.foober.foober.exception.ResourceNotFoundException;
 import com.foober.foober.model.Vehicle;
+import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.VehicleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,9 @@ public class VehicleService {
             vehicleDtos.add(new VehicleDto(vehicle));
         }
         return vehicleDtos;
+    }
+
+    public VehicleType[] getAllVehicleTypes() {
+        return VehicleType.values();
     }
 }

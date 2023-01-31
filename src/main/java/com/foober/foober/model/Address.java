@@ -1,10 +1,10 @@
 package com.foober.foober.model;
 
-import javax.persistence.*;
+import com.foober.foober.dto.ride.AddressDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -27,4 +27,12 @@ public class Address {
         this.longitude = longitude;
         this.streetAddress = streetAddress;
     }
+
+    public Address(AddressDto addressDto, int station) {
+        this.latitude = addressDto.getCoordinates().getLat();
+        this.longitude = addressDto.getCoordinates().getLng();
+        this.streetAddress = addressDto.getAddress();
+        this.station = station;
+    }
+
 }

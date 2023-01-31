@@ -2,6 +2,12 @@
 Backend for NWT &amp; KTS uni project
 
 ## Setup
+
+Add Google Maps API key to `application.properties`
+```properties
+google.maps.api.key=API_KEY
+```
+
 Use docker command in terminal to start database:
 ```sh
 docker-compose up
@@ -12,6 +18,7 @@ Run backend with an IDE of your choice. We recommend IntelliJ.
 
 
 ## Simulation
+A script is provided for simulating rides in real time.
 ### Requirements:
 - Google Maps API key
 - Python
@@ -23,7 +30,19 @@ Type this command in terminal to install dependencies:
 ```sh
 pip install locust googlemaps
 ```
-Use of virtual envorionment is recommended.
+Use of virtual environment is recommended.
+
+Creating a virtual environment in Linux and macOS:
+```shell
+   python3 -m venv venv
+   source venv/bin/activate
+```
+
+Creating a virtual environment in Windows:
+```shell
+  python -m venv venv
+  venv\Scripts\activate
+```
 
 ### Running driver simulation
 To run the simulation and see results follow these steps:
