@@ -2,7 +2,10 @@ package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.LocalUser;
+import com.foober.foober.dto.ReportDto;
 import com.foober.foober.dto.ride.SimpleDriverDto;
+import com.foober.foober.model.Client;
+import com.foober.foober.model.Driver;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.dto.ApiResponse;
 import com.foober.foober.dto.ride.RideInfoDto;
@@ -72,4 +75,21 @@ public class RideController {
         return new ApiResponse<>(HttpStatus.OK);
     }
 
+    @GetMapping("/report/client/{start}/{end}")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<ReportDto> getClientReport(@CurrentUser LocalUser user, @PathVariable String start, @PathVariable String end) {
+        return new ApiResponse<>(rideService.getClientReport((Client) user.getUser(), start, end));
+    }
+
+    @GetMapping("/report/driver/{start}/{end}")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public ApiResponse<ReportDto> getDriverReport(@CurrentUser LocalUser user, @PathVariable String start, @PathVariable String end) {
+        return new ApiResponse<>(rideService.getDriverReport((Driver) user.getUser(), start, end));
+    }
+
+    @GetMapping("/report/admin/{start}/{end}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<ReportDto> getAdminReport(@CurrentUser LocalUser user, @PathVariable String start, @PathVariable String end) {
+        return new ApiResponse<>(rideService.getAdminReport(start, end));
+    }
 }
