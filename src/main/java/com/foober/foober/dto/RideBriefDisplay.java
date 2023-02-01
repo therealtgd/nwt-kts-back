@@ -10,6 +10,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 public class RideBriefDisplay {
+    private long id;
     private UserBriefDisplay driver;
     private Set<UserBriefDisplay> clients;
     private double price;
@@ -18,4 +19,5 @@ public class RideBriefDisplay {
     private String endLocation;
     private String startTime;
     private String endTime;
+    private boolean favorite;
 }

@@ -92,8 +92,10 @@ public class RideService {
                 .toList()
         );
         route.add(new Address(rideInfoDto.getEndAddress(), route.size()));
-        Ride ride = new Ride(driver, clients, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
+        Ride ride = new Ride(driver, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
+        clients.forEach(client -> ride.addClient(client));
         rideRepository.save(ride);
+        clientRepository.saveAll(clients);
         // TODO: Send notification to Driver
     }
 

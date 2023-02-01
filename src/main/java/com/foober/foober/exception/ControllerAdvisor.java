@@ -12,6 +12,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ControllerAdvisor {
@@ -82,6 +83,11 @@ public class ControllerAdvisor {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(SignatureException.class)
     public ApiResponse<?> handleSignatureException(SignatureException e) {
+        return new ApiResponse<>(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NoSuchElementException.class)
+    public ApiResponse<?> handleNoSuchElementException(NoSuchElementException e) {
         return new ApiResponse<>(HttpStatus.BAD_REQUEST, e.getMessage());
     }
     @ResponseStatus(HttpStatus.CONFLICT)

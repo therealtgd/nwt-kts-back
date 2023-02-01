@@ -1,25 +1,32 @@
 package com.foober.foober.service;
 
+import com.foober.foober.dto.LatLng;
 import com.foober.foober.dto.RideBriefDisplay;
+import com.foober.foober.dto.RouteDto;
+import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.exception.InvalidTokenException;
 import com.foober.foober.exception.UserAlreadyActivatedException;
+import com.foober.foober.model.Address;
 import com.foober.foober.model.Client;
+import com.foober.foober.model.Ride;
 import com.foober.foober.model.User;
 import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.repos.ClientRepository;
+import com.foober.foober.repos.RideRepository;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.util.DtoConverter;
+import okhttp3.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private RideRepository rideRepository;
     @Autowired
     private TokenProvider tokenUtils;
 
@@ -48,7 +55,48 @@ public class ClientService {
     public Set<RideBriefDisplay> getRides(User user) {
         Client client = (Client) user;
         Set<RideBriefDisplay> rides = new HashSet<>();
-        client.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride)));
+        client.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
+                .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
         return rides;
+    }
+
+    public ArrayList<RouteDto> getFavoriteRoutes(User user) {
+        ArrayList<RouteDto> routes = new ArrayList<>();
+        Set<Ride> favoriteRides = ((Client) user).getFavorites();
+        favoriteRides.forEach(ride -> routes.add(getRouteDtoFromRoute(ride.getRoute())));
+        return routes;
+    }
+
+    private RouteDto getRouteDtoFromRoute(Set<Address> route) {
+        ArrayList<AddressDto> stops = new ArrayList<>();
+        route.stream().sorted(new AddressIndexComparator()).forEach(address -> stops.add(new AddressDto(address.getStreetAddress(), new LatLng(address.getLatitude(), address.getLongitude()))));
+        return new RouteDto(stops);
+    }
+
+    public void addFavoriteRoute(User user, long rideId) {
+        try {
+            Client client = (Client) user;
+            client.getFavorites().add(rideRepository.getById(rideId));
+            clientRepository.save(client);
+        } catch (Exception e) {
+            throw new NoSuchElementException("Ride doesn't exist.");
+        }
+    }
+
+    public void removeFavoriteRoute(User user, long rideId) {
+        try {
+            Client client = (Client) user;
+            client.getFavorites().remove(rideRepository.getById(rideId));
+            clientRepository.save(client);
+        } catch (Exception e) {
+            throw new NoSuchElementException("Ride doesn't exist.");
+        }
+    }
+}
+
+class AddressIndexComparator implements Comparator<Address> {
+    @Override
+    public int compare(Address o1, Address o2) {
+        return Integer.compare(o1.getStation(), o2.getStation());
     }
 }

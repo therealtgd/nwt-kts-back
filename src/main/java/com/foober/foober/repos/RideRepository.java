@@ -15,7 +15,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     @Query("SELECT r from Ride r WHERE r.status = 'IN_PROGRESS'")
     Optional<List<Ride>> getAllInProgress();
-
+    List<Ride> getRideByStatusAndClientsContaining(RideStatus status, Client client);
     List<Ride> getRideByStatusAndStartTimeBetweenAndDriverOrderByStartTimeAsc(RideStatus status, Long start, Long end, Driver driver);
     List<Ride> getRideByStatusAndStartTimeBetweenAndClientsContainingOrderByStartTimeAsc(RideStatus status, Long start, Long end, Client client);
     List<Ride> getRideByStatusAndStartTimeBetweenOrderByStartTimeAsc(RideStatus status, Long start, Long end);
