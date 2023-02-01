@@ -63,14 +63,14 @@ public class ClientService {
     public ArrayList<RouteDto> getFavoriteRoutes(User user) {
         ArrayList<RouteDto> routes = new ArrayList<>();
         Set<Ride> favoriteRides = ((Client) user).getFavorites();
-        favoriteRides.forEach(ride -> routes.add(getRouteDtoFromRoute(ride.getRoute())));
+        favoriteRides.forEach(ride -> routes.add(getRouteDtoFromRoute(ride.getId(), ride.getRoute())));
         return routes;
     }
 
-    private RouteDto getRouteDtoFromRoute(Set<Address> route) {
+    private RouteDto getRouteDtoFromRoute(long id, Set<Address> route) {
         ArrayList<AddressDto> stops = new ArrayList<>();
         route.stream().sorted(new AddressIndexComparator()).forEach(address -> stops.add(new AddressDto(address.getStreetAddress(), new LatLng(address.getLatitude(), address.getLongitude()))));
-        return new RouteDto(stops);
+        return new RouteDto(id, stops);
     }
 
     public void addFavoriteRoute(User user, long rideId) {
@@ -86,8 +86,20 @@ public class ClientService {
     public void removeFavoriteRoute(User user, long rideId) {
         try {
             Client client = (Client) user;
-            client.getFavorites().remove(rideRepository.getById(rideId));
-            clientRepository.save(client);
+            Ride found = null;
+            for (Ride r : client.getFavorites()) {
+                if (r.getId().equals(rideId)) {
+                    found = r;
+                    break;
+                }
+            }
+            if (found == null) {
+                throw new Exception();
+            }
+            else {
+                client.getFavorites().remove(found);
+                clientRepository.save(client);
+            }
         } catch (Exception e) {
             throw new NoSuchElementException("Ride doesn't exist.");
         }

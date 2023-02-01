@@ -9,5 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class RouteDto {
+    long id;
     List<AddressDto> stops;
 }
