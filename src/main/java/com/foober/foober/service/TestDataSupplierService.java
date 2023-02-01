@@ -39,12 +39,54 @@ public class TestDataSupplierService implements CommandLineRunner {
                 1.82,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 15 * 1000,
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 15 * 60 * 1000,
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000
                 );
         ride.addClient(client);
         ride = rideRepository.save(ride);
         addressRepository.saveAll(ride.getRoute());
+
+        Ride ride2 = new Ride(
+                Set.of(new Address(1, 0, 0, "Puskinova 28"),
+                        new Address(2, 0, 0, "Gogoljeva 22")),
+                3.5,
+                1.82,
+                RideStatus.COMPLETED,
+                (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 45 * 60 * 1000,
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 30 * 60 * 1000
+        );
+        ride2.addClient(client);
+        ride2 = rideRepository.save(ride2);
+        addressRepository.saveAll(ride2.getRoute());
+
+        Ride ride3 = new Ride(
+                Set.of(new Address(1, 0, 0, "Puskinova 28"),
+                        new Address(2, 0, 0, "Gogoljeva 22")),
+                3.5,
+                1.82,
+                RideStatus.COMPLETED,
+                (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 90 * 60 * 1000,
+                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 75 * 60 * 1000
+        );
+        ride3.addClient(client);
+        ride3 = rideRepository.save(ride3);
+        addressRepository.saveAll(ride3.getRoute());
+
+        Ride ride4 = new Ride(
+                Set.of(new Address(1, 0, 0, "Puskinova 28"),
+                        new Address(2, 0, 0, "Gogoljeva 22")),
+                3.5,
+                1.82,
+                RideStatus.COMPLETED,
+                (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
+                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 90 * 60 * 1000,
+                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 75 * 60 * 1000
+        );
+        ride4.addClient(client);
+        ride4 = rideRepository.save(ride4);
+        addressRepository.saveAll(ride4.getRoute());
         userRepository.save(client);
     }
 

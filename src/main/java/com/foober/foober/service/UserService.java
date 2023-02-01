@@ -38,7 +38,7 @@ public class UserService {
 
         Client client = buildClient(signUpRequest);
         if (Objects.equals(client.getUsername(), "") || client.getUsername() == null) {
-            client.setUsername(client.getEmail());
+            client.setUsername(client.getEmail().split("@")[0]);
         }
 
         try {

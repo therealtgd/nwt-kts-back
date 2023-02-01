@@ -1,10 +1,13 @@
 package com.foober.foober.service;
 
+import com.foober.foober.dto.ReportDto;
 import com.foober.foober.dto.ride.RideInfoDto;
+import com.foober.foober.exception.BadRequestException;
 import com.foober.foober.model.Address;
 import com.foober.foober.model.Client;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.Ride;
+import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.ClientRepository;
 import com.foober.foober.repos.DriverRepository;
@@ -18,6 +21,8 @@ import com.google.maps.model.Unit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -105,5 +110,131 @@ public class RideService {
             .await();
         DistanceMatrix matrix = request.await();
         return matrix.rows[0].elements[0].duration.inSeconds;
+    }
+
+    public ReportDto getClientReport(Client client, String start, String end) {
+        Long startTimestamp = stringToDate(start);
+        Long endTimestamp = stringToDate(end);
+        long nextTimestamp;
+        int    sumOfRides = 0,          rides;
+        double sumOfDistance = 0,       distance;
+        double sumOfTransactions = 0,   transaction;
+        ArrayList<Integer> ridesData = new ArrayList<>();
+        ArrayList<Double> distanceData = new ArrayList<>();
+        ArrayList<Double> transactionsData = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+
+        while (startTimestamp < endTimestamp) {
+            nextTimestamp = startTimestamp + 1000 * 60 * 60 * 24;
+            List<Ride> ridesList = rideRepository.getRideByStatusAndStartTimeBetweenAndClientsContainingOrderByStartTimeAsc(RideStatus.COMPLETED, startTimestamp, nextTimestamp, client);
+            labels.add(dateToString(startTimestamp));
+            rides = ridesList.size();
+            distance = ridesList.stream().mapToDouble(Ride::getDistance).sum();
+            transaction = ridesList.stream().mapToDouble(r -> r.getPrice() / r.getClients().size()).sum();
+            ridesData.add(rides);
+            distanceData.add(distance);
+            transactionsData.add(transaction);
+            sumOfRides += rides;
+            sumOfDistance += distance;
+            sumOfTransactions += transaction;
+
+            startTimestamp = nextTimestamp;
+        }
+
+        return new ReportDto(sumOfRides, sumOfDistance, sumOfTransactions,
+                Math.round(1.0 * sumOfRides / labels.size() * 100) / 100.0,
+                Math.round(sumOfDistance / labels.size() * 100) / 100.0,
+                Math.round(sumOfTransactions / labels.size() * 100) / 100.0,
+                ridesData, distanceData, transactionsData, labels
+        );
+    }
+
+    public ReportDto getDriverReport(Driver driver, String start, String end) {
+        Long startTimestamp = stringToDate(start);
+        Long endTimestamp = stringToDate(end);
+        long nextTimestamp;
+        int    sumOfRides = 0,          rides;
+        double sumOfDistance = 0,       distance;
+        double sumOfTransactions = 0,   transaction;
+        ArrayList<Integer> ridesData = new ArrayList<>();
+        ArrayList<Double> distanceData = new ArrayList<>();
+        ArrayList<Double> transactionsData = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+
+        while (startTimestamp < endTimestamp) {
+            nextTimestamp = startTimestamp + 1000 * 60 * 60 * 24;
+            List<Ride> ridesList = rideRepository.getRideByStatusAndStartTimeBetweenAndDriverOrderByStartTimeAsc(RideStatus.COMPLETED, startTimestamp, nextTimestamp, driver);
+            labels.add(dateToString(startTimestamp));
+            rides = ridesList.size();
+            distance = ridesList.stream().mapToDouble(Ride::getDistance).sum();
+            transaction = ridesList.stream().mapToDouble(Ride::getPrice).sum();
+            ridesData.add(rides);
+            distanceData.add(distance);
+            transactionsData.add(transaction);
+            sumOfRides += rides;
+            sumOfDistance += distance;
+            sumOfTransactions += transaction;
+
+            startTimestamp = nextTimestamp;
+        }
+
+        return new ReportDto(sumOfRides, sumOfDistance, sumOfTransactions,
+                Math.round(1.0 * sumOfRides / labels.size() * 100) / 100.0,
+                Math.round(sumOfDistance / labels.size() * 100) / 100.0,
+                Math.round(sumOfTransactions / labels.size() * 100) / 100.0,
+                ridesData, distanceData, transactionsData, labels
+        );
+    }
+
+    public ReportDto getAdminReport(String start, String end) {
+        Long startTimestamp = stringToDate(start);
+        Long endTimestamp = stringToDate(end);
+        long nextTimestamp;
+        int    sumOfRides = 0,          rides;
+        double sumOfDistance = 0,       distance;
+        double sumOfTransactions = 0,   transaction;
+        ArrayList<Integer> ridesData = new ArrayList<>();
+        ArrayList<Double> distanceData = new ArrayList<>();
+        ArrayList<Double> transactionsData = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+
+        while (startTimestamp < endTimestamp) {
+            nextTimestamp = startTimestamp + 1000 * 60 * 60 * 24;
+            List<Ride> ridesList = rideRepository.getRideByStatusAndStartTimeBetweenOrderByStartTimeAsc(RideStatus.COMPLETED, startTimestamp, nextTimestamp);
+            labels.add(dateToString(startTimestamp));
+            rides = ridesList.size();
+            distance = ridesList.stream().mapToDouble(Ride::getDistance).sum();
+            transaction = ridesList.stream().mapToDouble(Ride::getPrice).sum();
+            ridesData.add(rides);
+            distanceData.add(distance);
+            transactionsData.add(transaction);
+            sumOfRides += rides;
+            sumOfDistance += distance;
+            sumOfTransactions += transaction;
+
+            startTimestamp = nextTimestamp;
+        }
+
+        return new ReportDto(sumOfRides, sumOfDistance, sumOfTransactions,
+                Math.round(1.0 * sumOfRides / labels.size() * 100) / 100.0,
+                Math.round(sumOfDistance / labels.size() * 100) / 100.0,
+                Math.round(sumOfTransactions / labels.size() * 100) / 100.0,
+                ridesData, distanceData, transactionsData, labels
+        );
+    }
+
+    private String dateToString(Long timestamp) {
+        Date date=new Date(timestamp);
+        SimpleDateFormat df2 = new SimpleDateFormat("dd MMM");
+        return df2.format(date);
+    }
+    private long stringToDate(String date) {
+        SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+        try {
+            Date d = f.parse(date);
+            return d.getTime();
+        } catch (ParseException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

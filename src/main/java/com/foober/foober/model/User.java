@@ -29,9 +29,9 @@ public class User implements UserDetails {
     protected String password;
     @Column(name = "display_name", nullable = false, columnDefinition = "TEXT")
     protected String displayName;
-    @Column(name = "phone_number", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "phone_number", columnDefinition = "TEXT")
     protected String phoneNumber;
-    @Column(name = "city", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "city", columnDefinition = "TEXT")
     protected String city;
     @ManyToMany(fetch = FetchType.EAGER)
     protected Set<Role> authorities = new HashSet<>();
