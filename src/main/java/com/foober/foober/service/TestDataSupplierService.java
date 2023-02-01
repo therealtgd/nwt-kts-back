@@ -32,6 +32,7 @@ public class TestDataSupplierService implements CommandLineRunner {
 
     private void initializeRides() {
         Client client = (Client) userRepository.findByUsername("client").orElseThrow();
+        Client client2 = (Client) userRepository.findByUsername("client2").orElseThrow();
         Ride ride = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 1"),
                        new Address(2, 0, 0, "Gogoljeva 1")),
@@ -44,8 +45,10 @@ public class TestDataSupplierService implements CommandLineRunner {
                 );
         ride = rideRepository.save(ride);
         ride.addClient(client);
+        ride.addClient(client2);
         addressRepository.saveAll(ride.getRoute());
         client = userRepository.save(client);
+        client2 = userRepository.save(client2);
 
         Ride ride2 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 2"),
@@ -59,8 +62,10 @@ public class TestDataSupplierService implements CommandLineRunner {
         );
         ride2 = rideRepository.save(ride2);
         ride2.addClient(client);
+        ride2.addClient(client2);
         addressRepository.saveAll(ride2.getRoute());
         client = userRepository.save(client);
+        client2 = userRepository.save(client2);
 
         Ride ride3 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 3"),
@@ -187,6 +192,20 @@ public class TestDataSupplierService implements CommandLineRunner {
         client.setCredits(10000000);
         client.setEnabled(true);
         userRepository.save(client);
+
+        Client client2 = new Client();
+        client2.setUsername("client2");
+        client2.setEmail("client2@gmail.com");
+        client2.setPassword(passwordEncoder.encode("client"));
+        client2.setDisplayName("Vladan Mikic");
+        client2.setPhoneNumber("000000000");
+        client2.setCity("Novi Sad");
+        client2.setAuthorities(Set.of(roleRepository.findByName("ROLE_CLIENT"), roleRepository.findByName("ROLE_USER")));
+        client2.setPaymentInfo("");
+        client2.setPhoneNumber("068419532");
+        client2.setCredits(10000000);
+        client2.setEnabled(true);
+        userRepository.save(client2);
     }
 
     private void initializeRoles() {

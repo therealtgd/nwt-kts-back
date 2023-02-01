@@ -27,8 +27,11 @@ public class Client extends User {
             joinColumns = @JoinColumn(name = "client_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "ride_id", referencedColumnName = "id"))
     private Set<Ride> rides = new HashSet<>();
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ride_id")
+    @ManyToMany
+    @JoinTable(
+            name = "client_ride_favorite",
+            joinColumns = @JoinColumn(name = "client_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "ride_id", referencedColumnName = "id"))
     private Set<Ride> favorites = new HashSet<>();
     public Client(String username,
                   String email,
