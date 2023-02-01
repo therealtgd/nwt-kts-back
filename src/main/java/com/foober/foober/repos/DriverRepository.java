@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface DriverRepository extends JpaRepository<Driver, Long> {
 
-    @Query("SELECT d from Driver d WHERE d.status = 'AVAILABLE' or d.status = 'BUSY'")
+    @Query("SELECT d from Driver d WHERE d.status = 'AVAILABLE' or d.status = 'BUSY' or d.status = 'PENDING'")
     List<Driver> findAllActive();
 
     @Query(
