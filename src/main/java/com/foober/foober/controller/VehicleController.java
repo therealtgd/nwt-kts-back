@@ -7,7 +7,6 @@ import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.service.VehicleService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,16 +21,11 @@ import java.util.List;
 @AllArgsConstructor
 public class VehicleController {
     private final VehicleService vehicleService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @PutMapping(path = "/update/{id}/position")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<LatLng> updateVehicleLocation(@PathVariable("id") Long id, @RequestBody LatLng latlng) {
         this.vehicleService.updateVehicleLocation(id, latlng);
-        this.simpMessagingTemplate.convertAndSend(
-            "/map-updates/update-vehicle-position",
-            new VehicleDto(id, latlng)
-        );
         return new ApiResponse<>(latlng);
     }
 

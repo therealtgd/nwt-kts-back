@@ -1,31 +1,34 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.DriverDto;
+import com.foober.foober.dto.LatLng;
 import com.foober.foober.dto.RideBriefDisplay;
+import com.foober.foober.dto.VehicleDto;
 import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.Driver;
-import com.foober.foober.model.User;
-import com.foober.foober.model.enumeration.RideStatus;
-import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.Ride;
+import com.foober.foober.model.User;
 import com.foober.foober.model.Vehicle;
+import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.DriverRepository;
 import com.foober.foober.util.DtoConverter;
 import lombok.AllArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
+@EnableScheduling
 public class DriverService {
     private final DriverRepository driverRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final RideService rideService;
 
     public List<DriverDto> getActiveDriverDtos() {
@@ -88,6 +91,28 @@ public class DriverService {
             }
         }
         return null;
+    }
+
+    @Scheduled(fixedRate = 1000)
+    public void sendVehiclePositions() {
+        List<Driver> drivers = this.driverRepository.findAllActive();
+        List<VehicleDto> vehicleDtos = new ArrayList<>();
+        for (Driver driver: drivers) {
+            Vehicle vehicle = driver.getVehicle();
+            vehicleDtos.add(
+                new VehicleDto(
+                    vehicle.getId(),
+                    new LatLng(vehicle.getLatitude(), vehicle.getLongitude())
+                )
+            );
+        }
+        if (vehicleDtos.size() > 0) {
+            this.simpMessagingTemplate.convertAndSend(
+                "/map-updates/update-vehicle-positions",
+                vehicleDtos
+            );
+        }
+
     }
 }
 
