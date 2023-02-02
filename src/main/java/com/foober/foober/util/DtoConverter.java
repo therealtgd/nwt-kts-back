@@ -10,9 +10,7 @@ import org.apache.tomcat.util.codec.binary.Base64;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static com.foober.foober.util.GeneralUtils.TEMPLATE_IMAGE;
 
@@ -34,10 +32,11 @@ public class DtoConverter {
                 getAddressAtIndex(ride.getRoute(), ride.getRoute().size()),
                 longToTime(ride.getStartTime()),
                 longToTime(ride.getEndTime()),
-                favorite
+                favorite,
+                0
         );
     }
-    public static RideBriefDisplay rideToBriefDisplay(Ride ride) {
+    public static RideBriefDisplay rideToBriefDisplay(Ride ride, double rating) {
         Set<UserBriefDisplay> clients = new HashSet<>();
         ride.getClients().forEach(client -> clients.add(userToBriefDisplay(client)));
         return new RideBriefDisplay(
@@ -50,7 +49,8 @@ public class DtoConverter {
                 getAddressAtIndex(ride.getRoute(), ride.getRoute().size()),
                 longToTime(ride.getStartTime()),
                 longToTime(ride.getEndTime()),
-                false
+                false,
+                rating
         );
     }
     public static UserBriefDisplay userToBriefDisplay(User user) {

@@ -38,6 +38,8 @@ public class ClientSignUpRequest {
     private String confirmPassword;
     private SocialProvider socialProvider;
     private String providerUserId;
+    private String imageLink;
+    boolean imageUploaded;
 
     public ClientSignUpRequest(String providerUserId, String displayName, String email, String password, SocialProvider socialProvider) {
         this.providerUserId = providerUserId;

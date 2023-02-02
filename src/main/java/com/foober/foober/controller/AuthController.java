@@ -13,8 +13,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -36,10 +38,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ApiResponse<?> registerUser(@Valid @RequestBody ClientSignUpRequest signUpRequest) {
-            User user = userService.registerNewUser(signUpRequest);
-            return new ApiResponse<>(user.getEmail());
-
+    public ApiResponse<?> registerUser(@Valid @RequestPart("signupRequest") ClientSignUpRequest signUpRequest, @RequestPart(value = "image", required=false) MultipartFile image) {
+        User user = userService.registerNewUser(signUpRequest, image);
+        return new ApiResponse<>(user.getEmail());
     }
 
     @PutMapping("/signout")

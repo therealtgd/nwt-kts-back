@@ -7,21 +7,17 @@ import com.foober.foober.dto.RouteDto;
 import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.exception.InvalidTokenException;
 import com.foober.foober.exception.UserAlreadyActivatedException;
-import com.foober.foober.model.Address;
-import com.foober.foober.model.Client;
-import com.foober.foober.model.Ride;
-import com.foober.foober.model.User;
+import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.repos.ClientRepository;
 import com.foober.foober.repos.RideRepository;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.util.DtoConverter;
-import okhttp3.Route;
-import org.springframework.beans.factory.annotation.Autowired;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import static com.foober.foober.util.SortUtils.sort;
 
 @Service
 @AllArgsConstructor
@@ -53,12 +49,15 @@ public class ClientService {
         return user.getCredits();
     }
 
-    public Set<RideBriefDisplay> getRides(User user) {
+    public List<RideBriefDisplay> getRides(User user, String criteria) {
         Client client = (Client) user;
-        Set<RideBriefDisplay> rides = new HashSet<>();
+        var ref = new Object() {
+            List<RideBriefDisplay> rides = new ArrayList<>();
+        };
         client.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
-                .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
-        return rides;
+                .forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
+        ref.rides = sort(ref.rides, criteria);
+        return ref.rides;
     }
 
     public ArrayList<RouteDto> getFavoriteRoutes(User user) {

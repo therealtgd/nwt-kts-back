@@ -40,8 +40,8 @@ public class DriverController {
     
     @GetMapping("/rides")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
-    public ApiResponse<Set<RideBriefDisplay>> getRides(@CurrentUser LocalUser user) {
-        return new ApiResponse<>(driverService.getRides(user.getUser()));
+    public ApiResponse<List<RideBriefDisplay>> getRides(@CurrentUser LocalUser user, @PathVariable String criteria) {
+        return new ApiResponse<>(driverService.getRides(user.getUser(), criteria));
     }
     
     @Transactional

@@ -23,6 +23,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.foober.foober.util.SortUtils.sort;
+
 @Service
 @AllArgsConstructor
 @EnableScheduling
@@ -34,6 +36,7 @@ public class DriverService {
     private final VehicleRepository vehicleRepository;
     private final PendingDriverChangesRepository driverChangesRepository;
     private final RideRepository rideRepository;
+    private final ReviewRepository reviewRepository;
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -51,11 +54,25 @@ public class DriverService {
         return new DriverDto(this.driverRepository.getById(id));
     }
 
-    public Set<RideBriefDisplay> getRides(User user) {
+    public List<RideBriefDisplay> getRides(User user, String criteria) {
         Driver driver = (Driver) user;
-        Set<RideBriefDisplay> rides = new HashSet<>();
-        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride)));
-        return rides;
+        var ref = new Object() {
+            List<RideBriefDisplay> rides = new ArrayList<>();
+        };
+        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, getRideReview(ride))));
+        ref.rides = sort(ref.rides, criteria);
+        return ref.rides;
+    }
+
+    private double getRideReview(Ride ride) {
+        List<Review> reviews = reviewRepository.getReviewsByRide(ride);
+        int sum = reviews.stream().mapToInt(Review::getRating).sum();
+        if (sum == 0) {
+            return 0;
+        }
+        else {
+            return 1.0 * sum / reviews.size();
+        }
     }
     
     @Transactional
