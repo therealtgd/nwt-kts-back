@@ -20,4 +20,5 @@ public class RideBriefDisplay {
     private String startTime;
     private String endTime;
     private boolean favorite;
+    private double rating;
 }

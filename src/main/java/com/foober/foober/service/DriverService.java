@@ -34,6 +34,7 @@ public class DriverService {
     private final VehicleRepository vehicleRepository;
     private final PendingDriverChangesRepository driverChangesRepository;
     private final RideRepository rideRepository;
+    private final ReviewRepository reviewRepository;
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -54,8 +55,19 @@ public class DriverService {
     public Set<RideBriefDisplay> getRides(User user) {
         Driver driver = (Driver) user;
         Set<RideBriefDisplay> rides = new HashSet<>();
-        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride)));
+        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, getRideReview(ride))));
         return rides;
+    }
+
+    private double getRideReview(Ride ride) {
+        List<Review> reviews = reviewRepository.getReviewsByRide(ride);
+        int sum = reviews.stream().mapToInt(Review::getRating).sum();
+        if (sum == 0) {
+            return 0;
+        }
+        else {
+            return 1.0 * sum / reviews.size();
+        }
     }
     
     @Transactional

@@ -7,17 +7,12 @@ import com.foober.foober.dto.RouteDto;
 import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.exception.InvalidTokenException;
 import com.foober.foober.exception.UserAlreadyActivatedException;
-import com.foober.foober.model.Address;
-import com.foober.foober.model.Client;
-import com.foober.foober.model.Ride;
-import com.foober.foober.model.User;
+import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.repos.ClientRepository;
 import com.foober.foober.repos.RideRepository;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.util.DtoConverter;
-import okhttp3.Route;
-import org.springframework.beans.factory.annotation.Autowired;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
