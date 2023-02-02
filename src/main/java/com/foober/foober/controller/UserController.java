@@ -2,20 +2,34 @@ package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.*;
+import com.foober.foober.model.User;
 import com.foober.foober.service.UserService;
 import com.foober.foober.util.GeneralUtils;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import static com.foober.foober.util.GeneralUtils.TEMPLATE_IMAGE;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user")
 public class UserController {
     private UserService userService;
+
+    @GetMapping("/get/{username}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<UserBriefDisplay> getUserByUsername(@PathVariable String username) {
+        String image = TEMPLATE_IMAGE;
+        User user = this.userService.findByUsername(username);
+        if (user.getImage() != null)
+            image = Base64.encodeBase64String(user.getImage().getData());
+        return new ApiResponse<>(new UserBriefDisplay(user.getDisplayName(), user.getUsername(), image));
+    }
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('ROLE_USER')")
