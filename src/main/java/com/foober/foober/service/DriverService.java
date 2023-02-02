@@ -23,6 +23,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.foober.foober.util.SortUtils.sort;
+
 @Service
 @AllArgsConstructor
 @EnableScheduling
@@ -52,11 +54,14 @@ public class DriverService {
         return new DriverDto(this.driverRepository.getById(id));
     }
 
-    public Set<RideBriefDisplay> getRides(User user) {
+    public List<RideBriefDisplay> getRides(User user, String criteria) {
         Driver driver = (Driver) user;
-        Set<RideBriefDisplay> rides = new HashSet<>();
-        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, getRideReview(ride))));
-        return rides;
+        var ref = new Object() {
+            List<RideBriefDisplay> rides = new ArrayList<>();
+        };
+        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, getRideReview(ride))));
+        ref.rides = sort(ref.rides, criteria);
+        return ref.rides;
     }
 
     private double getRideReview(Ride ride) {
