@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -69,5 +71,17 @@ public class Ride {
     public void addClient(Client client) {
         clients.add(client);
         client.getRides().add(this);
+    }
+
+    public Address getStartAddress() {
+        return this.getRoute().stream().filter(a -> a.getStation() == 0).findFirst().orElse(null);
+    }
+
+    public Address getEndAddress() {
+        return this.getRoute().stream().filter(a -> a.getStation() == this.getRoute().size() - 1).findFirst().orElse(null);
+    }
+
+    public List<Address> getStops() {
+        return this.getRoute().stream().filter(a -> a.getStation() != 0 && a.getStation() != this.getRoute().size() - 1).collect(Collectors.toList());
     }
 }

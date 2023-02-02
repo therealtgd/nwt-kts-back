@@ -32,15 +32,18 @@ public class DriverController {
     public ApiResponse<List<DriverDto>> getActiveDrivers() {
         return new ApiResponse<>(this.driverService.getActiveDriverDtos());
     }
+    
     @GetMapping(path = "/get-all-by-status")
     public ApiResponse<List<DriverDto>> getAllByStatus(@RequestParam(name = "status") DriverStatus status, @CurrentUser LocalUser user) {
         return new ApiResponse<>(this.driverService.getAllByStatus(status, user != null ? user.getUser() : null));
     }
+    
     @GetMapping("/rides")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<Set<RideBriefDisplay>> getRides(@CurrentUser LocalUser user) {
         return new ApiResponse<>(driverService.getRides(user.getUser()));
     }
+    
     @Transactional
     @PutMapping("/unassign")
     @PreAuthorize("hasRole('ROLE_CLIENT')")
@@ -48,11 +51,13 @@ public class DriverController {
         this.driverService.unassignDriver(id);
         return new ApiResponse<>("Successfully unassigned driver.");
     }
+
     @GetMapping(path = "/me")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<DriverDto> getActiveDrivers(@CurrentUser LocalUser user) {
         return new ApiResponse<>(driverService.getMe(user.getUser()));
     }
+    
     @PostMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<?> update(@CurrentUser LocalUser user, @Valid @RequestPart("updateRequest") DriverUpdateRequest updateRequest, @RequestPart(value = "image", required=false) MultipartFile image) {
@@ -63,5 +68,11 @@ public class DriverController {
             return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Could not upload the file: %s!",
                     image.getOriginalFilename()));
         }
+    }
+    
+    @GetMapping("/active-ride")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public ApiResponse<ActiveRideDto> getActiveRide(@CurrentUser LocalUser user) {
+        return new ApiResponse<>(this.driverService.getActiveRide(user.getUser()));
     }
 }

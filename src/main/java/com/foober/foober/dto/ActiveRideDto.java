@@ -5,7 +5,6 @@ import com.foober.foober.model.Ride;
 import lombok.Data;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Data
 public class ActiveRideDto {
@@ -22,15 +21,9 @@ public class ActiveRideDto {
     public ActiveRideDto(Ride ride) {
         this.distance = ride.getDistance();
         this.duration = ride.getEta();
-        this.startAddress = new AddressDto(ride.getRoute().stream()
-                .filter(a -> a.getStation() == 0)
-                .findFirst().orElseThrow(NoSuchElementException::new));
-        this.endAddress = new AddressDto(ride.getRoute().stream()
-                .filter(a -> a.getStation() == ride.getRoute().size() - 1)
-                .findFirst().orElseThrow(NoSuchElementException::new));
-        this.stops = ride.getRoute().stream()
-                .filter(a -> a.getStation() != 0 && a.getStation() != ride.getRoute().size() - 1)
-                .map(AddressDto::new).toList();
+        this.startAddress = new AddressDto(ride.getStartAddress());
+        this.endAddress = new AddressDto(ride.getEndAddress());
+        this.stops = ride.getStops().stream().map(AddressDto::new).toList();
         this.driver = new DriverDto(ride.getDriver());
         this.price = ride.getPrice();
         this.clients = ride.getClients().stream().map(UserBriefDisplay::new).toList();

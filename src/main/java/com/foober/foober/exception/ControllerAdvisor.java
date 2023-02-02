@@ -135,4 +135,10 @@ public class ControllerAdvisor {
         return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ClientHasNoActiveRidesException.class)
+    public ApiResponse<?> handleClientHasNoActiveRideException(ClientHasNoActiveRidesException e) {
+        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
 }

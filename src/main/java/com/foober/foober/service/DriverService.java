@@ -1,19 +1,12 @@
 package com.foober.foober.service;
 
-import com.foober.foober.dto.DriverDto;
-import com.foober.foober.dto.DriverUpdateRequest;
-import com.foober.foober.dto.LatLng;
-import com.foober.foober.dto.RideBriefDisplay;
-import com.foober.foober.dto.VehicleDto;
+import com.foober.foober.dto.*;
 import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.*;
-import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
-import com.foober.foober.repos.DriverRepository;
-import com.foober.foober.repos.ImageRepository;
-import com.foober.foober.repos.PendingDriverChangesRepository;
-import com.foober.foober.repos.VehicleRepository;
+import com.foober.foober.repos.*;
 import com.foober.foober.util.DtoConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,10 +17,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +33,7 @@ public class DriverService {
     private final ImageRepository imageRepository;
     private final VehicleRepository vehicleRepository;
     private final PendingDriverChangesRepository driverChangesRepository;
+    private final RideRepository rideRepository;
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -217,6 +211,11 @@ public class DriverService {
     public DriverDto getMe(User user) {
         Driver driver = driverRepository.getById(user.getId());
         return new DriverDto(driver);
+    }
+    
+    public ActiveRideDto getActiveRide(User user) {
+        Optional<Ride> ride = rideRepository.getInProgressRideByClientId(user.getId());
+        return ride.map(ActiveRideDto::new).orElse(null);
     }
 }
 
