@@ -56,15 +56,6 @@ public class Ride {
 
     public Ride(Driver driver, Set<Address> route, double price, double distance) {
         this.driver = driver;
-        this.clients = new HashSet<>();
-        this.route = route;
-        this.price = price;
-        this.distance = distance;
-        this.status = RideStatus.ON_ROUTE;
-    }
-
-    public Ride(Driver driver, Set<Address> route, double price, double distance) {
-        this.driver = driver;
         this.route = route;
         this.price = price;
         this.distance = distance;

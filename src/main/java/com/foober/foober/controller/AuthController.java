@@ -7,6 +7,7 @@ import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,6 +43,7 @@ public class AuthController {
     }
 
     @PutMapping("/signout")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ApiResponse<?> signOut(@CurrentUser LocalUser user) {
         this.userService.setOfflineUser(user.getUser());
         return new ApiResponse<>(user.getUsername()+" signed out successfully.");

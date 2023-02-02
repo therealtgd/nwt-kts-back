@@ -51,12 +51,12 @@ public class RideService {
     }
 
     public List<Ride> getRidesNearestToEnd() {
-        Optional<List<Ride>> rides = rideRepository.getAllInProgress();
+        Optional<List<Ride>> rides = rideRepository.getAllInProgressNotReserved();
         List<Ride> rideList = new ArrayList<>();
         if (rides.isPresent() && !rides.get().isEmpty()) {
             rides.get().sort((r1, r2) -> {
-                Address endOfRoute1 = r1.getRoute().stream().reduce((a, b) -> b).orElse(null);
-                Address endOfRoute2 = r2.getRoute().stream().reduce((a, b) -> b).orElse(null);
+                Address endOfRoute1 = r1.getRoute().stream().filter(r -> r.getStation() == r1.getRoute().size()-1).findFirst().orElse(null);
+                Address endOfRoute2 = r1.getRoute().stream().filter(r -> r.getStation() == r2.getRoute().size()-1).findFirst().orElse(null);
                 if (endOfRoute1 == null || endOfRoute2 == null) {
                     return 0;
                 }
@@ -93,11 +93,21 @@ public class RideService {
         Ride ride = new Ride(driver, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
         clients.forEach(ride::addClient);
         try {
-            ride.setEta(this.getTimeLeftOnRoute(
+
+            long newRideDriverEta = this.getTimeLeftOnRoute(
                     driver.getVehicle().getLatitude(),
                     driver.getVehicle().getLongitude(),
                     rideInfoDto.getStartAddress().getCoordinates().getLat(),
-                    rideInfoDto.getStartAddress().getCoordinates().getLng()));
+                    rideInfoDto.getStartAddress().getCoordinates().getLng());
+            if (driver.getStatus().equals(DriverStatus.BUSY)) {
+                long activeRideTimeUntilEnd = this.getTimeLeftOnRoute(
+                        driver.getVehicle().getLatitude(),
+                        driver.getVehicle().getLongitude(),
+                        rideInfoDto.getStartAddress().getCoordinates().getLat(),
+                        rideInfoDto.getStartAddress().getCoordinates().getLng());
+                newRideDriverEta += activeRideTimeUntilEnd;
+            }
+            ride.setEta(newRideDriverEta);
             rideRepository.save(ride);
             clientRepository.saveAll(clients);
             return new ActiveRideDto(ride);
@@ -114,11 +124,6 @@ public class RideService {
                 .toList()
         );
         route.add(new Address(rideInfoDto.getEndAddress(), route.size()));
-        Ride ride = new Ride(driver, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
-        clients.forEach(client -> ride.addClient(client));
-        rideRepository.save(ride);
-        clientRepository.saveAll(clients);
-        // TODO: Send notification to Driver
         return route;
     }
 
