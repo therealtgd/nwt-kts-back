@@ -36,10 +36,10 @@ public class ClientController {
             return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "The client doesn't exist.");
         }
     }
-    @GetMapping("/rides")
+    @GetMapping("/rides/{criteria}")
     @PreAuthorize("hasRole('ROLE_CLIENT')")
-    public ApiResponse<Set<RideBriefDisplay>> getRides(@CurrentUser LocalUser user) {
-        return new ApiResponse<>(clientService.getRides(user.getUser()));
+    public ApiResponse<List<RideBriefDisplay>> getRides(@CurrentUser LocalUser user, @PathVariable String criteria) {
+        return new ApiResponse<>(clientService.getRides(user.getUser(), criteria));
     }
 
     @GetMapping("/favorite-routes")

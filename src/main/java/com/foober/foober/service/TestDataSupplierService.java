@@ -36,8 +36,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         Ride ride = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 1"),
                        new Address(2, 0, 0, "Gogoljeva 1")),
-                3.5,
-                1.82,
+                120,
+                0.96,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 15 * 60 * 1000,
@@ -53,7 +53,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         Ride ride2 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 2"),
                         new Address(2, 0, 0, "Gogoljeva 2")),
-                3.5,
+                350,
                 1.82,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
@@ -70,8 +70,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         Ride ride3 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 3"),
                         new Address(2, 0, 0, "Gogoljeva 3")),
-                3.5,
-                1.82,
+                479,
+                2.4,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 90 * 60 * 1000,
@@ -85,12 +85,12 @@ public class TestDataSupplierService implements CommandLineRunner {
         Ride ride4 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 4"),
                         new Address(2, 0, 0, "Gogoljeva 4")),
-                3.5,
-                1.82,
+                560,
+                3.78,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
-                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 90 * 60 * 1000,
-                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 75 * 60 * 1000
+                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 120 * 60 * 1000,
+                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 95 * 60 * 1000
         );
         ride4.addClient(client);
         ride4 = rideRepository.save(ride4);

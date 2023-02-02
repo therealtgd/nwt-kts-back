@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import static com.foober.foober.util.SortUtils.sort;
 
 @Service
 @AllArgsConstructor
@@ -48,12 +49,15 @@ public class ClientService {
         return user.getCredits();
     }
 
-    public Set<RideBriefDisplay> getRides(User user) {
+    public List<RideBriefDisplay> getRides(User user, String criteria) {
         Client client = (Client) user;
-        Set<RideBriefDisplay> rides = new HashSet<>();
+        var ref = new Object() {
+            List<RideBriefDisplay> rides = new ArrayList<>();
+        };
         client.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
-                .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
-        return rides;
+                .forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
+        ref.rides = sort(ref.rides, criteria);
+        return ref.rides;
     }
 
     public ArrayList<RouteDto> getFavoriteRoutes(User user) {
