@@ -1,6 +1,7 @@
 package com.foober.foober.repos;
 
 import com.foober.foober.model.Driver;
+import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +27,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
         double lng
     );
 
+    @Query("SELECT d from Driver d WHERE d.status = ?1")
+    List<Driver> findAllByStatus(DriverStatus status);
 }

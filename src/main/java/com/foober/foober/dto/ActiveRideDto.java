@@ -1,29 +1,25 @@
-package com.foober.foober.dto.ride;
+package com.foober.foober.dto;
 
-
+import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.model.Ride;
-import com.foober.foober.model.User;
-import com.foober.foober.model.enumeration.VehicleType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Data
-@AllArgsConstructor
-public class RideInfoDto {
-    private double distance;
-    private double duration;
+public class ActiveRideDto {
+    private DriverDto driver;
     private AddressDto startAddress;
     private AddressDto endAddress;
-    private VehicleType vehicleType;
-    private SimpleDriverDto driver;
+    private List<UserBriefDisplay> clients;
+    private double distance;
+    private double duration;
     private List<AddressDto> stops;
     private double price;
-    private List<String> clients;
+    private long eta;
 
-    public RideInfoDto(Ride ride) {
+    public ActiveRideDto(Ride ride) {
         this.distance = ride.getDistance();
         this.duration = ride.getEta();
         this.startAddress = new AddressDto(ride.getRoute().stream()
@@ -35,9 +31,9 @@ public class RideInfoDto {
         this.stops = ride.getRoute().stream()
                 .filter(a -> a.getStation() != 0 && a.getStation() != ride.getRoute().size() - 1)
                 .map(AddressDto::new).toList();
-        this.vehicleType = ride.getDriver().getVehicle().getType();
-        this.driver = new SimpleDriverDto(ride.getDriver());
+        this.driver = new DriverDto(ride.getDriver());
         this.price = ride.getPrice();
-        this.clients = ride.getClients().stream().map(User::getUsername).toList();
+        this.clients = ride.getClients().stream().map(UserBriefDisplay::new).toList();
+        this.eta = ride.getEta();
     }
 }

@@ -3,6 +3,7 @@ package com.foober.foober.dto;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.enumeration.DriverStatus;
 import lombok.Data;
+import org.apache.tomcat.util.codec.binary.Base64;
 
 @Data
 public class DriverDto {
@@ -13,6 +14,7 @@ public class DriverDto {
     private Boolean enabled;
     private DriverStatus status;
     private VehicleDto vehicle;
+    private String image;
 
     public DriverDto(Driver driver) {
         this.id = driver.getId();
@@ -22,5 +24,7 @@ public class DriverDto {
         this.enabled = driver.isEnabled();
         this.status = driver.getStatus();
         this.vehicle = new VehicleDto(driver.getVehicle());
+        this.image = driver.getImage() != null ? Base64.encodeBase64String(driver.getImage().getData()) : null;
     }
+
 }

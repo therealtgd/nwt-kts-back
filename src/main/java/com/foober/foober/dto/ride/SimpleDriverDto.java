@@ -11,10 +11,12 @@ public class SimpleDriverDto {
     private long id;
     private String displayName;
     private DriverStatus status;
+    private boolean isReserved;
 
     public SimpleDriverDto(Driver driver) {
         this.id = driver.getId();
         this.displayName = driver.getDisplayName();
         this.status = driver.getStatus();
+        this.isReserved = driver.isReserved();
     }
 }

@@ -14,4 +14,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     @Query("SELECT c FROM Client c WHERE c.username IN (:usernames)")
     Set<Client> findUsersByUsernames(@Param("usernames") List<String> usernames);
+
+    @Query("SELECT c from Client c JOIN c.rides r where c.id = ?1 AND (r.status = 'ON_ROUTE' OR r.status = 'IN_PROGRESS') ")
+    Optional<Client> getClientInActiveRideById(long id);
+
 }

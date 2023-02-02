@@ -1,19 +1,21 @@
 package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
+import com.foober.foober.dto.ActiveRideDto;
+import com.foober.foober.dto.ApiResponse;
 import com.foober.foober.dto.LocalUser;
 import com.foober.foober.dto.ReportDto;
+import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.Client;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.enumeration.DriverStatus;
-import com.foober.foober.dto.ApiResponse;
-import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.service.DriverService;
 import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,7 @@ public class RideController {
 
     private final RideService rideService;
     private final DriverService driverService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @GetMapping("/price")
     public ApiResponse<Integer> getPrice(
@@ -59,6 +62,7 @@ public class RideController {
     }
 
     @GetMapping("/nearest-free-driver")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<SimpleDriverDto> getNearestFreeDriver(
             @RequestParam(value="vehicleType") String vehicleType,
             @RequestParam(value="petsAllowed") boolean petsAllowed,
@@ -66,13 +70,22 @@ public class RideController {
             @RequestParam(value="lat") double lat,
             @RequestParam(value="lng") double lng
     ) {
+        this.simpMessagingTemplate.convertAndSend(
+                "/driver/reserved",
+                "You have been reserved for a ride."
+        );
         return new ApiResponse<>(driverService.getNearestFreeDriver(vehicleType, petsAllowed, babiesAllowed, lat, lng));
     }
 
     @PostMapping("/order")
-    public ApiResponse<Object> orderRide(@RequestBody RideInfoDto rideInfoDto) {
-        this.rideService.orderRide(rideInfoDto);
-        return new ApiResponse<>(HttpStatus.OK);
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<ActiveRideDto> orderRide(@RequestBody RideInfoDto rideInfoDto) {
+        ActiveRideDto ride = this.rideService.orderRide(rideInfoDto);
+        this.simpMessagingTemplate.convertAndSend(
+                "/driver/ride-assigned",
+                ride
+        );
+        return new ApiResponse<>(ride);
     }
 
     @GetMapping("/report/client/{start}/{end}")

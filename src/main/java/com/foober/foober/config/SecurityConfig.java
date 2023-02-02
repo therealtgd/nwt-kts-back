@@ -2,7 +2,7 @@ package com.foober.foober.config;
 
 import com.foober.foober.security.jwt.TokenAuthenticationFilter;
 import com.foober.foober.security.oauth2.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -29,22 +29,14 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+@AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
-
-    @Autowired
-    CustomOidcUserService customOidcUserService;
-
-    @Autowired
-    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-
-    @Autowired
-    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private final UserDetailsService userDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    final CustomOidcUserService customOidcUserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -69,9 +61,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     "/oauth2/**",
                     "/image/**",
                     "/ride/price",
+                    "/vehicle/types",
                     "/client/register/confirm",
                     "/socket/**",
                     "/driver/get-all-active",
+                    "/driver/get-all-by-status",
                     "/user/forgot-password",
                     "/user/reset-password"
                 ).permitAll()

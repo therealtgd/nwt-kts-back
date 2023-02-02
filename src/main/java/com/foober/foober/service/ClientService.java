@@ -1,6 +1,7 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.LatLng;
+import com.foober.foober.dto.ActiveRideDto;
 import com.foober.foober.dto.RideBriefDisplay;
 import com.foober.foober.dto.RouteDto;
 import com.foober.foober.dto.ride.AddressDto;
@@ -17,18 +18,18 @@ import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.util.DtoConverter;
 import okhttp3.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class ClientService {
-    @Autowired
-    private ClientRepository clientRepository;
-    @Autowired
-    private RideRepository rideRepository;
-    @Autowired
-    private TokenProvider tokenUtils;
+
+    private final ClientRepository clientRepository;
+    private final RideRepository rideRepository;
+    private final TokenProvider tokenUtils;
 
     public void confirmRegistration(String token) {
 
@@ -104,6 +105,16 @@ public class ClientService {
             throw new NoSuchElementException("Ride doesn't exist.");
         }
     }
+
+     public boolean hasActiveRide(User user) {
+        return rideRepository.activeRideByUserIsPresent((Client) user);
+    }
+
+    public ActiveRideDto getActiveRide(User user) {
+        return rideRepository.getActiveRideByClient((Client) user)
+                .map(ActiveRideDto::new)
+                .orElse(null);
+    }
 }
 
 class AddressIndexComparator implements Comparator<Address> {
@@ -111,4 +122,5 @@ class AddressIndexComparator implements Comparator<Address> {
     public int compare(Address o1, Address o2) {
         return Integer.compare(o1.getStation(), o2.getStation());
     }
+   
 }

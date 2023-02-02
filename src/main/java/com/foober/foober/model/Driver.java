@@ -19,6 +19,6 @@ public class Driver extends User {
     private Vehicle vehicle;
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
     private Set<Ride> rides = new HashSet<>();
-
-
+    // Driver is near the end of their current ride and has a new reservation, but the client hasn't ordered yet.
+    private boolean isReserved;
 }
