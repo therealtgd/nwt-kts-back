@@ -105,4 +105,10 @@ public class RideController {
     public ApiResponse<ReportDto> getAdminReport(@CurrentUser LocalUser user, @PathVariable String start, @PathVariable String end) {
         return new ApiResponse<>(rideService.getAdminReport(start, end));
     }
+
+    @GetMapping("/driver-eta")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<Long> getDriverEta(@CurrentUser LocalUser user) {
+        return new ApiResponse<>(rideService.getDriverEta(user.getUser()));
+    }
 }

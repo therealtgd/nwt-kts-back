@@ -132,7 +132,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_1.setUsername("testdriver1");
         test_driver_1.setEmail("driver1@gmail.com");
         test_driver_1.setPassword(passwordEncoder.encode("driver"));
-        test_driver_1.setDisplayName("Test Driver");
+        test_driver_1.setDisplayName("Mirko Ciric");
         test_driver_1.setPhoneNumber("000000000");
         test_driver_1.setCity("Novi Sad");
         test_driver_1.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
@@ -149,7 +149,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_2.setUsername("testdriver2");
         test_driver_2.setEmail("driver2@gmail.com");
         test_driver_2.setPassword(passwordEncoder.encode("driver"));
-        test_driver_2.setDisplayName("Test Driver");
+        test_driver_2.setDisplayName("Vladimir Zelenski");
         test_driver_2.setPhoneNumber("000000000");
         test_driver_2.setCity("Novi Sad");
         test_driver_2.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));
@@ -166,7 +166,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         test_driver_3.setUsername("testdriver3");
         test_driver_3.setEmail("driver3@gmail.com");
         test_driver_3.setPassword(passwordEncoder.encode("driver"));
-        test_driver_3.setDisplayName("Test Driver");
+        test_driver_3.setDisplayName("Muhamed Hambdualahic");
         test_driver_3.setPhoneNumber("000000000");
         test_driver_3.setCity("Novi Sad");
         test_driver_3.setAuthorities(Set.of(roleRepository.findByName("ROLE_DRIVER"), roleRepository.findByName("ROLE_USER")));

@@ -3,10 +3,7 @@ package com.foober.foober.service;
 import com.foober.foober.dto.ActiveRideDto;
 import com.foober.foober.dto.ReportDto;
 import com.foober.foober.dto.ride.RideInfoDto;
-import com.foober.foober.exception.BadRequestException;
-import com.foober.foober.exception.ClientUnavailable;
-import com.foober.foober.exception.DriverUnavailable;
-import com.foober.foober.exception.UnableToGetDriverEtaException;
+import com.foober.foober.exception.*;
 import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.ClientStatus;
 import com.foober.foober.model.enumeration.DriverStatus;
@@ -55,8 +52,8 @@ public class RideService {
         List<Ride> rideList = new ArrayList<>();
         if (rides.isPresent() && !rides.get().isEmpty()) {
             rides.get().sort((r1, r2) -> {
-                Address endOfRoute1 = r1.getRoute().stream().filter(r -> r.getStation() == r1.getRoute().size()-1).findFirst().orElse(null);
-                Address endOfRoute2 = r1.getRoute().stream().filter(r -> r.getStation() == r2.getRoute().size()-1).findFirst().orElse(null);
+                Address endOfRoute1 = r1.getEndAddress();
+                Address endOfRoute2 = r2.getEndAddress();
                 if (endOfRoute1 == null || endOfRoute2 == null) {
                     return 0;
                 }
@@ -92,23 +89,34 @@ public class RideService {
         Set<Address> route = getRoute(rideInfoDto);
         Ride ride = new Ride(driver, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
         clients.forEach(ride::addClient);
+        clients.forEach(c -> c.setStatus(ClientStatus.IN_RIDE));
         try {
-
-            long newRideDriverEta = this.getTimeLeftOnRoute(
-                    driver.getVehicle().getLatitude(),
-                    driver.getVehicle().getLongitude(),
-                    rideInfoDto.getStartAddress().getCoordinates().getLat(),
-                    rideInfoDto.getStartAddress().getCoordinates().getLng());
+            long eta = 0L;
             if (driver.getStatus().equals(DriverStatus.BUSY)) {
                 long activeRideTimeUntilEnd = this.getTimeLeftOnRoute(
                         driver.getVehicle().getLatitude(),
                         driver.getVehicle().getLongitude(),
+                        rideInfoDto.getEndAddress().getCoordinates().getLat(),
+                        rideInfoDto.getEndAddress().getCoordinates().getLng()
+                );
+                long newRideDriverEta = this.getTimeLeftOnRoute(
+                        rideInfoDto.getEndAddress().getCoordinates().getLat(),
+                        rideInfoDto.getEndAddress().getCoordinates().getLng(),
                         rideInfoDto.getStartAddress().getCoordinates().getLat(),
-                        rideInfoDto.getStartAddress().getCoordinates().getLng());
-                newRideDriverEta += activeRideTimeUntilEnd;
+                        rideInfoDto.getStartAddress().getCoordinates().getLng()
+                );
+                eta = activeRideTimeUntilEnd + newRideDriverEta;
+            } else {
+                eta = this.getTimeLeftOnRoute(
+                        driver.getVehicle().getLatitude(),
+                        driver.getVehicle().getLongitude(),
+                        rideInfoDto.getStartAddress().getCoordinates().getLat(),
+                        rideInfoDto.getStartAddress().getCoordinates().getLng()
+                );
             }
-            ride.setEta(newRideDriverEta);
-            rideRepository.save(ride);
+            ride.setEta(eta);
+
+            ride = rideRepository.save(ride);
             clientRepository.saveAll(clients);
             return new ActiveRideDto(ride);
         } catch (Exception e) {
@@ -289,7 +297,12 @@ public class RideService {
         }
     }
 
-    public long getDriverEta(Ride ride) {
+    public long getDriverEta(User user) {
+        Ride ride = rideRepository.getActiveRideByClient((Client) user)
+                .orElseThrow(() -> new ClientHasNoActiveRidesException(user.getUsername()));
+        if (ride.getEta() <= 0) {
+            return 0L;
+        }
         double driverLat = ride.getDriver().getVehicle().getLatitude();
         double driverLng = ride.getDriver().getVehicle().getLongitude();
         Optional<Address> address = ride.getRoute().stream().filter(r -> r.getStation() == 0).findFirst();
