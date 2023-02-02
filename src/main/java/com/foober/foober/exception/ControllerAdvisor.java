@@ -12,6 +12,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
@@ -32,8 +33,10 @@ public class ControllerAdvisor {
             String errorMessage = error.getDefaultMessage();
             errors.put(objectName, errorMessage);
         });
-
-        return new ApiResponse<String>(HttpStatus.BAD_REQUEST, "Field validation failed.");
+        String mapAsString = errors.keySet().stream()
+                .map(key -> key + " " + errors.get(key))
+                .collect(Collectors.joining(", ", "", ""));
+        return new ApiResponse<String>(HttpStatus.BAD_REQUEST, "Field validation failed.", mapAsString);
     }
     @ResponseStatus(HttpStatus.GONE)
     @ExceptionHandler(TokenExpiredException.class)

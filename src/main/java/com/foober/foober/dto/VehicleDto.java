@@ -10,6 +10,7 @@ public class VehicleDto {
     private int capacity;
     private boolean petsAllowed;
     private boolean babiesAllowed;
+    private String vehicleType;
     private LatLng position;
 
     public VehicleDto(Vehicle vehicle) {
@@ -18,6 +19,7 @@ public class VehicleDto {
         this.capacity = vehicle.getCapacity();
         this.petsAllowed = vehicle.isPetsAllowed();
         this.babiesAllowed = vehicle.isBabiesAllowed();
+        this.vehicleType = vehicle.getType().toString();
         this.position = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
     }
 

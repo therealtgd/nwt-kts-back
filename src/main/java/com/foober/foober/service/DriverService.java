@@ -1,6 +1,7 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.DriverDto;
+import com.foober.foober.dto.DriverUpdateRequest;
 import com.foober.foober.dto.LatLng;
 import com.foober.foober.dto.RideBriefDisplay;
 import com.foober.foober.dto.VehicleDto;
@@ -11,19 +12,26 @@ import com.foober.foober.model.User;
 import com.foober.foober.model.Vehicle;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.RideStatus;
+import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.DriverRepository;
+import com.foober.foober.repos.ImageRepository;
+import com.foober.foober.repos.PendingDriverChangesRepository;
+import com.foober.foober.repos.VehicleRepository;
 import com.foober.foober.util.DtoConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +41,9 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final RideService rideService;
+    private final ImageRepository imageRepository;
+    private final VehicleRepository vehicleRepository;
+    private final PendingDriverChangesRepository driverChangesRepository;
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -106,6 +117,58 @@ public class DriverService {
         return null;
     }
 
+    public void update(User user, DriverUpdateRequest updateRequest, MultipartFile file) throws IOException {
+        Driver driver = (Driver) user;
+
+        Vehicle vehicle = new Vehicle(
+                updateRequest.getLicencePlate(),
+                updateRequest.getCapacity(),
+                updateRequest.isPetsAllowed(),
+                updateRequest.isBabiesAllowed(),
+                VehicleType.valueOf(updateRequest.getVehicleType())
+        );
+        vehicleRepository.save(vehicle);
+
+        if (updateRequest.isImageUploaded()) {
+            Image image = new Image(
+                    StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())),
+                    file.getContentType(),
+                    file.getSize(),
+                    file.getBytes()
+            );
+            imageRepository.save(image);
+
+            PendingDriverChanges changes = new PendingDriverChanges(
+                    driver,
+                    updateRequest.getDisplayName(),
+                    updateRequest.getUsername(),
+                    updateRequest.getPhoneNumber(),
+                    updateRequest.getCity(),
+                    image,
+                    vehicle,
+                    System.currentTimeMillis()
+            );
+            driverChangesRepository.save(changes);
+        }
+        else {
+            PendingDriverChanges changes = new PendingDriverChanges(
+                    driver,
+                    updateRequest.getDisplayName(),
+                    updateRequest.getUsername(),
+                    updateRequest.getPhoneNumber(),
+                    updateRequest.getCity(),
+                    vehicle,
+                    System.currentTimeMillis()
+            );
+            driverChangesRepository.save(changes);
+        }
+    }
+
+    public DriverDto getMe(User user) {
+        Driver driver = driverRepository.getById(user.getId());
+        return new DriverDto(driver);
+    }
+
     @Scheduled(fixedRate = 1000)
     public void sendVehiclePositions() {
         List<Driver> drivers = this.driverRepository.findAllActive();
@@ -150,21 +213,6 @@ public class DriverService {
             }
         }
 
-        for (Long driverId : workTimestamps.keySet()) {
-            List<Long> timestamps = workTimestamps.get(driverId);
-            if (timestamps.size() > (8*60)/6) {
-                updateStatus(driverId, DriverStatus.OFFLINE);
-            }
-        }
-    }
-    
-    public void unassignDriver(long id) {
-        Driver driver = driverRepository.getById(id);
-        if (driver.isReserved()) {
-            driver.setReserved(false);
-        } else if (driver.getStatus().equals(DriverStatus.PENDING)){
-            driver.setStatus(DriverStatus.AVAILABLE);
-        }
     }
 }
 

@@ -25,6 +25,13 @@ public class ApiResponse<T> {
         this.body = null;
     }
 
+    public ApiResponse(HttpStatus status, String message, T body) {
+        this.success = status.value() >= 200 && status.value() < 300;
+        this.status = status;
+        this.message = message;
+        this.body = body;
+    }
+
     public ApiResponse(T body) {
         this.body = body;
         this.success = true;

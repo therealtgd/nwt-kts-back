@@ -29,4 +29,14 @@ public class Image {
     @Column(name = "data", nullable = false)
     private byte[] data;
 
+    public Image (String filename,
+                  String contentType,
+                  Long size,
+                  byte[] data) {
+        this.filename = filename;
+        this.contentType = contentType;
+        this.size = size;
+        this.data = data;
+    }
+
 }
