@@ -6,13 +6,9 @@ import com.foober.foober.dto.LatLng;
 import com.foober.foober.dto.RideBriefDisplay;
 import com.foober.foober.dto.VehicleDto;
 import com.foober.foober.dto.ride.SimpleDriverDto;
-import com.foober.foober.model.Driver;
-import com.foober.foober.model.Ride;
-import com.foober.foober.model.User;
-import com.foober.foober.model.Vehicle;
-import com.foober.foober.model.enumeration.DriverStatus;
-import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.*;
+import com.foober.foober.model.enumeration.RideStatus;
+import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.DriverRepository;
 import com.foober.foober.repos.ImageRepository;
@@ -56,7 +52,6 @@ public class DriverService {
         }
         return drivers.stream().map(DriverDto::new).collect(Collectors.toList());
     }
-
 
     public DriverDto getCompatibleDriverDto(Long id) {
         return new DriverDto(this.driverRepository.getById(id));
@@ -117,6 +112,61 @@ public class DriverService {
         return null;
     }
 
+    @Scheduled(fixedRate = 1000)
+    public void sendVehiclePositions() {
+        List<Driver> drivers = this.driverRepository.findAllActive();
+        List<VehicleDto> vehicleDtos = new ArrayList<>();
+        for (Driver driver: drivers) {
+            Vehicle vehicle = driver.getVehicle();
+            vehicleDtos.add(
+                new VehicleDto(
+                    vehicle.getId(),
+                    new LatLng(vehicle.getLatitude(), vehicle.getLongitude())
+                )
+            );
+        }
+        if (vehicleDtos.size() > 0) {
+            this.simpMessagingTemplate.convertAndSend(
+                "/map-updates/update-vehicle-positions",
+                vehicleDtos
+            );
+        }
+    }
+
+    private final Map<Long, List<Long>> workTimestamps = new HashMap<>();
+    @Scheduled(fixedRate = 6*60*1000)
+    public void trackWorkHours() {
+        long now = Instant.now().getEpochSecond();
+        Instant a24hours = Instant.now().minus(24, ChronoUnit.HOURS);
+
+        List<Driver> drivers = this.driverRepository.findAllActive();
+        for (Driver driver: drivers) {
+            if (!workTimestamps.containsKey(driver.getId()))
+                workTimestamps.put(driver.getId(), new ArrayList<>());
+            workTimestamps.get(driver.getId()).add(now);
+        }
+
+        for (List<Long> entry: workTimestamps.values()) {
+            ListIterator<Long> iter = entry.listIterator();
+            while(iter.hasNext()) {
+                if (!Instant.ofEpochSecond(now).isBefore(a24hours)) {
+                    break;
+                }
+                iter.remove();
+            }
+        }
+
+    }
+
+    public void unassignDriver(long id) {
+        Driver driver = driverRepository.getById(id);
+        if (driver.isReserved()) {
+            driver.setReserved(false);
+        } else if (driver.getStatus().equals(DriverStatus.PENDING)){
+            driver.setStatus(DriverStatus.AVAILABLE);
+        }
+    }
+
     public void update(User user, DriverUpdateRequest updateRequest, MultipartFile file) throws IOException {
         Driver driver = (Driver) user;
 
@@ -167,52 +217,6 @@ public class DriverService {
     public DriverDto getMe(User user) {
         Driver driver = driverRepository.getById(user.getId());
         return new DriverDto(driver);
-    }
-
-    @Scheduled(fixedRate = 1000)
-    public void sendVehiclePositions() {
-        List<Driver> drivers = this.driverRepository.findAllActive();
-        List<VehicleDto> vehicleDtos = new ArrayList<>();
-        for (Driver driver: drivers) {
-            Vehicle vehicle = driver.getVehicle();
-            vehicleDtos.add(
-                new VehicleDto(
-                    vehicle.getId(),
-                    new LatLng(vehicle.getLatitude(), vehicle.getLongitude())
-                )
-            );
-        }
-        if (vehicleDtos.size() > 0) {
-            this.simpMessagingTemplate.convertAndSend(
-                "/map-updates/update-vehicle-positions",
-                vehicleDtos
-            );
-        }
-    }
-
-    private final Map<Long, List<Long>> workTimestamps = new HashMap<>();
-    @Scheduled(fixedRate = 6*60*1000)
-    public void trackWorkHours() {
-        long now = Instant.now().getEpochSecond();
-        Instant a24hours = Instant.now().minus(24, ChronoUnit.HOURS);
-
-        List<Driver> drivers = this.driverRepository.findAllActive();
-        for (Driver driver: drivers) {
-            if (!workTimestamps.containsKey(driver.getId()))
-                workTimestamps.put(driver.getId(), new ArrayList<>());
-            workTimestamps.get(driver.getId()).add(now);
-        }
-
-        for (List<Long> entry: workTimestamps.values()) {
-            ListIterator<Long> iter = entry.listIterator();
-            while(iter.hasNext()) {
-                if (!Instant.ofEpochSecond(now).isBefore(a24hours)) {
-                    break;
-                }
-                iter.remove();
-            }
-        }
-
     }
 }
 

@@ -1,8 +1,8 @@
 package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
-import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.dto.*;
+import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.service.DriverService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
