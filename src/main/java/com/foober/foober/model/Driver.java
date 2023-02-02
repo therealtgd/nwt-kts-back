@@ -1,10 +1,10 @@
 package com.foober.foober.model;
 
 import com.foober.foober.model.enumeration.DriverStatus;
-import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,4 +19,6 @@ public class Driver extends User {
     private Vehicle vehicle;
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
     private Set<Ride> rides = new HashSet<>();
+
+
 }

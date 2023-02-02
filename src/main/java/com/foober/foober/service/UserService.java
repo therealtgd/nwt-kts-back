@@ -1,18 +1,20 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.*;
-import com.foober.foober.model.*;
-import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.foober.foober.exception.*;
+import com.foober.foober.model.Client;
+import com.foober.foober.model.Role;
+import com.foober.foober.model.User;
 import com.foober.foober.repos.RoleRepository;
 import com.foober.foober.repos.UserRepository;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfo;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfoFactory;
 import com.foober.foober.util.GeneralUtils;
+import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
@@ -196,5 +198,5 @@ public class UserService {
             throw new BadRequestException(e.getMessage());
         }
     }
-    
+
 }

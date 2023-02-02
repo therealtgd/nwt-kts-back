@@ -21,6 +21,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -112,7 +114,37 @@ public class DriverService {
                 vehicleDtos
             );
         }
+    }
 
+    private final Map<Long, List<Long>> workTimestamps = new HashMap<>();
+    @Scheduled(fixedRate = 6*60*1000)
+    public void trackWorkHours() {
+        long now = Instant.now().getEpochSecond();
+        Instant a24hours = Instant.now().minus(24, ChronoUnit.HOURS);
+
+        List<Driver> drivers = this.driverRepository.findAllActive();
+        for (Driver driver: drivers) {
+            if (!workTimestamps.containsKey(driver.getId()))
+                workTimestamps.put(driver.getId(), new ArrayList<>());
+            workTimestamps.get(driver.getId()).add(now);
+        }
+
+        for (List<Long> entry: workTimestamps.values()) {
+            ListIterator<Long> iter = entry.listIterator();
+            while(iter.hasNext()) {
+                if (!Instant.ofEpochSecond(now).isBefore(a24hours)) {
+                    break;
+                }
+                iter.remove();
+            }
+        }
+
+        for (Long driverId : workTimestamps.keySet()) {
+            List<Long> timestamps = workTimestamps.get(driverId);
+            if (timestamps.size() > (8*60)/6) {
+                updateStatus(driverId, DriverStatus.OFFLINE);
+            }
+        }
     }
 }
 
