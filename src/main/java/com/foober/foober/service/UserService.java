@@ -1,26 +1,17 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.*;
+import com.foober.foober.exception.*;
 import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.ClientStatus;
 import com.foober.foober.model.enumeration.DriverStatus;
-import com.foober.foober.repos.ClientRepository;
-import com.foober.foober.repos.DriverRepository;
-import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.foober.foober.exception.*;
-import com.foober.foober.model.Client;
-import com.foober.foober.model.Role;
-import com.foober.foober.model.User;
-import com.foober.foober.repos.RoleRepository;
-import com.foober.foober.repos.UserRepository;
+import com.foober.foober.repos.*;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfo;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfoFactory;
 import com.foober.foober.util.GeneralUtils;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,9 +19,13 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 @Service
@@ -43,18 +38,36 @@ public class UserService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final ClientRepository clientRepository;
     private final DriverRepository driverRepository;
+    private final ImageRepository imageRepository;
 
-    public User registerNewUser(ClientSignUpRequest signUpRequest) throws UserAlreadyExistsException {
-
-        checkForExistingEmail(signUpRequest.getEmail());
-        checkForExistingUsername(signUpRequest.getUsername());
-
-        Client client = buildClient(signUpRequest);
-        if (Objects.equals(client.getUsername(), "") || client.getUsername() == null) {
-            client.setUsername(client.getEmail().split("@")[0]);
-        }
+    public User registerNewUser(ClientSignUpRequest signUpRequest, MultipartFile file) throws UserAlreadyExistsException {
 
         try {
+            checkForExistingEmail(signUpRequest.getEmail());
+            checkForExistingUsername(signUpRequest.getUsername());
+
+            Client client = buildClient(signUpRequest);
+            if (Objects.equals(client.getUsername(), "") || client.getUsername() == null) {
+                client.setUsername(client.getEmail().split("@")[0]);
+            }
+            if (signUpRequest.getImageLink() != null) {
+                Image image = new Image(
+                        "google-image",
+                        "png",
+                        0L,
+                        getProfilePicture(signUpRequest.getImageLink())
+                );
+                client.setImage(image);
+            }
+            else if (signUpRequest.isImageUploaded() && file != null) {
+                 Image image = new Image(
+                        StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())),
+                        file.getContentType(),
+                        file.getSize(),
+                        file.getBytes()
+                );
+                client.setImage(image);
+            }
             client = userRepository.save(client);
             String token = tokenUtils.generateConfirmationToken(client);
             emailService.sendRegistrationEmail(client, token);
@@ -83,7 +96,8 @@ public class UserService {
             }
             user = updateExistingUser(user, oAuth2UserInfo);
         } else {
-            user = registerNewUser(userDetails);
+            userDetails.setImageLink((String) attributes.get("picture"));
+            user = registerNewUser(userDetails, null);
         }
 
         return LocalUser.create(user, attributes, idToken, userInfo);
@@ -138,7 +152,7 @@ public class UserService {
         final HashSet<Role> roles = new HashSet<Role>();
         roles.add(roleRepository.findByName("ROLE_CLIENT"));
         roles.add(roleRepository.findByName("ROLE_USER"));
-        Client client = new Client(
+        return new Client(
                 formDTO.getUsername(),
                 formDTO.getEmail(),
                 passwordEncoder.encode(formDTO.getPassword()),
@@ -151,7 +165,6 @@ public class UserService {
                 formDTO.getSocialProvider().getProviderType(),
                 formDTO.getProviderUserId()
         );
-        return client;
     }
 
     public void update(UpdateRequest updateRequest, User user) {
@@ -235,6 +248,22 @@ public class UserService {
             Driver driver = (Driver) user;
             driver.setStatus(DriverStatus.OFFLINE);
             driverRepository.save(driver);
+        }
+    }
+
+    private byte[] getProfilePicture(String urlString) {
+        try (InputStream in = new URL(urlString).openStream()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[16384];
+            int n = 0;
+            while (-1 != (n = in.read(buf))) {
+                out.write(buf, 0, n);
+            }
+            out.close();
+            in.close();
+            return out.toByteArray();
+        } catch (Exception e) {
+            return null;
         }
     }
 }
