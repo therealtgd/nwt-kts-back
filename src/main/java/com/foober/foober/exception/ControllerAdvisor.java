@@ -115,4 +115,21 @@ public class ControllerAdvisor {
     public ApiResponse<?> handleUserIsNotActivatedException(UserIsNotActivatedException e) {
         return new ApiResponse<>(HttpStatus.CONFLICT, e.getMessage());
     }
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(UnableToGetDriverEtaException.class)
+    public ApiResponse<?> handleUnableToGetDriverEtaException(UnableToGetDriverEtaException e) {
+        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get driver eta.");
+    }
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ClientUnavailable.class)
+    public ApiResponse<?> handleClientsInActiveRideException(ClientUnavailable e) {
+        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(DriverUnavailable.class)
+    public ApiResponse<?> handleClientsInActiveRideException(DriverUnavailable e) {
+        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
 }

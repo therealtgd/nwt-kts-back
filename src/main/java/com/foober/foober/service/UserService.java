@@ -1,6 +1,15 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.*;
+import com.foober.foober.model.*;
+import com.foober.foober.model.enumeration.ClientStatus;
+import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.repos.ClientRepository;
+import com.foober.foober.repos.DriverRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.foober.foober.exception.*;
 import com.foober.foober.model.Client;
 import com.foober.foober.model.Role;
@@ -32,6 +41,8 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final ClientRepository clientRepository;
+    private final DriverRepository driverRepository;
 
     public User registerNewUser(ClientSignUpRequest signUpRequest) throws UserAlreadyExistsException {
 
@@ -199,4 +210,31 @@ public class UserService {
         }
     }
 
+    public void setOnlineUser(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            if (user.get().getClass() == Client.class) {
+                Client client = (Client) user.get();
+                client.setStatus(ClientStatus.ONLINE);
+                clientRepository.save(client);
+            } else if (user.get().getClass() == Driver.class) {
+                Driver driver = (Driver) user.get();
+                driver.setStatus(DriverStatus.AVAILABLE);
+                driverRepository.save(driver);
+            }
+
+        }
+    }
+
+    public void setOfflineUser(User user) {
+        if (user.getClass() == Client.class) {
+            Client client = (Client) user;
+            client.setStatus(ClientStatus.OFFLINE);
+            clientRepository.save(client);
+        } else if (user.getClass() == Driver.class) {
+            Driver driver = (Driver) user;
+            driver.setStatus(DriverStatus.OFFLINE);
+            driverRepository.save(driver);
+        }
+    }
 }

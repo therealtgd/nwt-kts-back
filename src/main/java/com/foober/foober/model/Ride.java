@@ -34,6 +34,8 @@ public class Ride {
     private Long startTime;
     @Column()
     private Long endTime;
+    @Column(nullable = false)
+    private long eta;
 
     public Ride(Set<Address> route,
                 double price,
@@ -54,10 +56,13 @@ public class Ride {
 
     public Ride(Driver driver, Set<Address> route, double price, double distance) {
         this.driver = driver;
-        this.clients = new HashSet<>();
         this.route = route;
         this.price = price;
         this.distance = distance;
+        this.clients = new HashSet<>();
+        this.startTime = 0L;
+        this.endTime = 0L;
+        this.eta = 0;
         this.status = RideStatus.ON_ROUTE;
     }
 

@@ -1,6 +1,8 @@
 package com.foober.foober.model;
 
 import javax.persistence.*;
+
+import com.foober.foober.model.enumeration.ClientStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +35,9 @@ public class Client extends User {
             joinColumns = @JoinColumn(name = "client_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "ride_id", referencedColumnName = "id"))
     private Set<Ride> favorites = new HashSet<>();
+    @Enumerated(EnumType.STRING)
+    private ClientStatus status;
+
     public Client(String username,
                   String email,
                   String password,
@@ -55,5 +60,6 @@ public class Client extends User {
         this.paymentInfo = paymentInfo;
         this.provider = provider;
         this.providerUserId = providerUserId;
+        this.status = ClientStatus.OFFLINE;
     }
 }

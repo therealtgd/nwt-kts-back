@@ -28,6 +28,7 @@ public class ClientController {
         return new ApiResponse<>("Registration confirmed.");
     }
     @GetMapping("/credits")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<Integer> getCreditsBalance(@CurrentUser LocalUser user) {
         try {
             return new ApiResponse<>(clientService.getCreditsBalance(user.getUser()));
@@ -59,6 +60,12 @@ public class ClientController {
     public ApiResponse<?> deleteFavoriteRoute(@CurrentUser LocalUser user, @PathVariable long rideId) {
         clientService.removeFavoriteRoute(user.getUser(), rideId);
         return new ApiResponse<>("Successfully removed the route from favorites.");
+    }
+    
+    @GetMapping("/active-ride")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<ActiveRideDto> getActiveRide(@CurrentUser LocalUser user) {
+        return new ApiResponse<>(clientService.getActiveRide(user.getUser()));
     }
 
 }

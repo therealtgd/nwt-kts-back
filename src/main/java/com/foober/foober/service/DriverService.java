@@ -24,6 +24,7 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -34,13 +35,17 @@ public class DriverService {
     private final RideService rideService;
 
     public List<DriverDto> getActiveDriverDtos() {
-        List<Driver> drivers = this.driverRepository.findAllActive();
-        List<DriverDto> driverDtos = new ArrayList<>();
-        for(Driver driver : drivers) {
-            driverDtos.add(new DriverDto(driver));
-        }
-        return driverDtos;
+        return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
     }
+
+    public List<DriverDto> getAllByStatus(DriverStatus status, User user) {
+        List<Driver> drivers = this.driverRepository.findAllByStatus(status);
+        if (user != null && user.getClass() == Driver.class) {
+            drivers = drivers.stream().filter(d -> !Objects.equals(d.getId(), user.getId())).toList();
+        }
+        return drivers.stream().map(DriverDto::new).collect(Collectors.toList());
+    }
+
 
     public DriverDto getCompatibleDriverDto(Long id) {
         return new DriverDto(this.driverRepository.getById(id));
@@ -72,7 +77,10 @@ public class DriverService {
         );
         SimpleDriverDto simpleDriverDto = null;
         if (drivers.isPresent() && !drivers.get().isEmpty()) {
-            simpleDriverDto = new SimpleDriverDto(drivers.get().get(0));
+            Driver driver = drivers.get().get(0);
+            driver.setStatus(DriverStatus.PENDING);
+            driver = driverRepository.save(driver);
+            simpleDriverDto = new SimpleDriverDto(driver);
         } else {
             List<Ride> rides = rideService.getRidesNearestToEnd();
             if (!rides.isEmpty()) {
@@ -82,14 +90,17 @@ public class DriverService {
         return simpleDriverDto;
     }
 
-    private static SimpleDriverDto getCompatibleDriverDto(String vehicleType, boolean petsAllowed, boolean babiesAllowed, List<Ride> rides) {
+    private SimpleDriverDto getCompatibleDriverDto(String vehicleType, boolean petsAllowed, boolean babiesAllowed, List<Ride> rides) {
         for (Ride r : rides) {
             Vehicle vehicle = r.getDriver().getVehicle();
             if (vehicle.getType() == Enum.valueOf(VehicleType.class, vehicleType)
                 && (!petsAllowed || vehicle.isPetsAllowed())
                 && (!babiesAllowed || vehicle.isBabiesAllowed())
             ) {
-                return new SimpleDriverDto(r.getDriver());
+                Driver driver = r.getDriver();
+                driver.setReserved(true);
+                driver = driverRepository.save(driver);
+                return new SimpleDriverDto(driver);
             }
         }
         return null;
@@ -144,6 +155,15 @@ public class DriverService {
             if (timestamps.size() > (8*60)/6) {
                 updateStatus(driverId, DriverStatus.OFFLINE);
             }
+        }
+    }
+    
+    public void unassignDriver(long id) {
+        Driver driver = driverRepository.getById(id);
+        if (driver.isReserved()) {
+            driver.setReserved(false);
+        } else if (driver.getStatus().equals(DriverStatus.PENDING)){
+            driver.setStatus(DriverStatus.AVAILABLE);
         }
     }
 }

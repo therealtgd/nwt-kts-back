@@ -1,19 +1,18 @@
 package com.foober.foober.controller;
 
+import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.*;
 import com.foober.foober.model.User;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -32,6 +31,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.createToken(authentication);
+        userService.setOnlineUser(loginRequest.getEmail());
         return new ApiResponse<>(jwt);
     }
 
@@ -40,6 +40,13 @@ public class AuthController {
             User user = userService.registerNewUser(signUpRequest);
             return new ApiResponse<>(user.getEmail());
 
+    }
+
+    @PutMapping("/signout")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ApiResponse<?> signOut(@CurrentUser LocalUser user) {
+        this.userService.setOfflineUser(user.getUser());
+        return new ApiResponse<>(user.getUsername()+" signed out successfully.");
     }
 
 }
