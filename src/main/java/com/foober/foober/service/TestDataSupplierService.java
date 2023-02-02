@@ -32,9 +32,10 @@ public class TestDataSupplierService implements CommandLineRunner {
 
     private void initializeRides() {
         Client client = (Client) userRepository.findByUsername("client").orElseThrow();
+        Client client2 = (Client) userRepository.findByUsername("client2").orElseThrow();
         Ride ride = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 28"),
-                       new Address(2, 0, 0, "Gogoljeva 22")),
+                Set.of(new Address(1, 0, 0, "Puskinova 1"),
+                       new Address(2, 0, 0, "Gogoljeva 1")),
                 3.5,
                 1.82,
                 RideStatus.COMPLETED,
@@ -42,13 +43,16 @@ public class TestDataSupplierService implements CommandLineRunner {
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 15 * 60 * 1000,
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000
                 );
-        ride.addClient(client);
         ride = rideRepository.save(ride);
+        ride.addClient(client);
+        ride.addClient(client2);
         addressRepository.saveAll(ride.getRoute());
+        client = userRepository.save(client);
+        client2 = userRepository.save(client2);
 
         Ride ride2 = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 28"),
-                        new Address(2, 0, 0, "Gogoljeva 22")),
+                Set.of(new Address(1, 0, 0, "Puskinova 2"),
+                        new Address(2, 0, 0, "Gogoljeva 2")),
                 3.5,
                 1.82,
                 RideStatus.COMPLETED,
@@ -56,13 +60,16 @@ public class TestDataSupplierService implements CommandLineRunner {
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 45 * 60 * 1000,
                 System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 30 * 60 * 1000
         );
-        ride2.addClient(client);
         ride2 = rideRepository.save(ride2);
+        ride2.addClient(client);
+        ride2.addClient(client2);
         addressRepository.saveAll(ride2.getRoute());
+        client = userRepository.save(client);
+        client2 = userRepository.save(client2);
 
         Ride ride3 = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 28"),
-                        new Address(2, 0, 0, "Gogoljeva 22")),
+                Set.of(new Address(1, 0, 0, "Puskinova 3"),
+                        new Address(2, 0, 0, "Gogoljeva 3")),
                 3.5,
                 1.82,
                 RideStatus.COMPLETED,
@@ -73,10 +80,11 @@ public class TestDataSupplierService implements CommandLineRunner {
         ride3.addClient(client);
         ride3 = rideRepository.save(ride3);
         addressRepository.saveAll(ride3.getRoute());
+        client = userRepository.save(client);
 
         Ride ride4 = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 28"),
-                        new Address(2, 0, 0, "Gogoljeva 22")),
+                Set.of(new Address(1, 0, 0, "Puskinova 4"),
+                        new Address(2, 0, 0, "Gogoljeva 4")),
                 3.5,
                 1.82,
                 RideStatus.COMPLETED,
@@ -184,6 +192,20 @@ public class TestDataSupplierService implements CommandLineRunner {
         client.setCredits(10000000);
         client.setEnabled(true);
         userRepository.save(client);
+
+        Client client2 = new Client();
+        client2.setUsername("client2");
+        client2.setEmail("client2@gmail.com");
+        client2.setPassword(passwordEncoder.encode("client"));
+        client2.setDisplayName("Vladan Mikic");
+        client2.setPhoneNumber("000000000");
+        client2.setCity("Novi Sad");
+        client2.setAuthorities(Set.of(roleRepository.findByName("ROLE_CLIENT"), roleRepository.findByName("ROLE_USER")));
+        client2.setPaymentInfo("");
+        client2.setPhoneNumber("068419532");
+        client2.setCredits(10000000);
+        client2.setEnabled(true);
+        userRepository.save(client2);
     }
 
     private void initializeRoles() {

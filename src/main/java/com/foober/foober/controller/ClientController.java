@@ -1,19 +1,16 @@
 package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
-import com.foober.foober.dto.ApiResponse;
-import com.foober.foober.dto.ClientSignUpConfirmation;
-import com.foober.foober.dto.LocalUser;
-import com.foober.foober.dto.RideBriefDisplay;
+import com.foober.foober.dto.*;
 import com.foober.foober.service.ClientService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Set;
 
 
@@ -42,6 +39,26 @@ public class ClientController {
     @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<Set<RideBriefDisplay>> getRides(@CurrentUser LocalUser user) {
         return new ApiResponse<>(clientService.getRides(user.getUser()));
+    }
+
+    @GetMapping("/favorite-routes")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<List<RouteDto>> getFavoriteRoutes(@CurrentUser LocalUser user) {
+        return new ApiResponse<>(clientService.getFavoriteRoutes(user.getUser()));
+    }
+
+    @PutMapping("/set-favorite/{rideId}")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<?> setFavoriteRoute(@CurrentUser LocalUser user, @PathVariable long rideId) {
+        clientService.addFavoriteRoute(user.getUser(), rideId);
+        return new ApiResponse<>("Successfully added the route to favorites.");
+    }
+
+    @DeleteMapping("/remove-favorite/{rideId}")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<?> deleteFavoriteRoute(@CurrentUser LocalUser user, @PathVariable long rideId) {
+        clientService.removeFavoriteRoute(user.getUser(), rideId);
+        return new ApiResponse<>("Successfully removed the route from favorites.");
     }
 
 }
