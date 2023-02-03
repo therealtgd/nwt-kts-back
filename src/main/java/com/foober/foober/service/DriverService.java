@@ -2,6 +2,8 @@ package com.foober.foober.service;
 
 import com.foober.foober.dto.*;
 import com.foober.foober.dto.ride.SimpleDriverDto;
+import com.foober.foober.exception.EmailAlreadyExistsException;
+import com.foober.foober.exception.UsernameAlreadyExistsException;
 import com.foober.foober.model.*;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.RideStatus;
@@ -32,11 +34,13 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final RideService rideService;
+    private final RoleRepository roleRepository;
     private final ImageRepository imageRepository;
     private final VehicleRepository vehicleRepository;
     private final PendingDriverChangesRepository driverChangesRepository;
     private final RideRepository rideRepository;
     private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -223,6 +227,51 @@ public class DriverService {
     public ActiveRideDto getActiveRide(User user) {
         Optional<Ride> ride = rideRepository.getInProgressRideByClientId(user.getId());
         return ride.map(ActiveRideDto::new).orElse(null);
+    }
+
+    public void registerNewDriver(DriverSignUpRequest signUpRequest, MultipartFile file) throws IOException {
+        final HashSet<Role> roles = new HashSet<Role>();
+        roles.add(roleRepository.findByName("ROLE_DRIVER"));
+        roles.add(roleRepository.findByName("ROLE_USER"));
+
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            throw new UsernameAlreadyExistsException("There is already someone registered with that username.");
+        }
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            throw new EmailAlreadyExistsException("There is already someone registered with that email.");
+        }
+
+        Vehicle vehicle = new Vehicle(
+                signUpRequest.getLicencePlate(),
+                signUpRequest.getCapacity(),
+                signUpRequest.isPetsAllowed(),
+                signUpRequest.isBabiesAllowed(),
+                VehicleType.valueOf(signUpRequest.getVehicleType())
+        );
+        vehicle = vehicleRepository.save(vehicle);
+
+        Driver driver = new Driver(
+                signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                signUpRequest.getPassword(),
+                signUpRequest.getDisplayName(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getCity(),
+                roles,
+                vehicle
+        );
+        driver = driverRepository.save(driver);
+
+        if (signUpRequest.isImageUploaded()) {
+            Image image = new Image(
+                    StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())),
+                    file.getContentType(),
+                    file.getSize(),
+                    file.getBytes()
+            );
+            driver.setImage(image);
+            driverRepository.save(driver);
+        }
     }
 }
 

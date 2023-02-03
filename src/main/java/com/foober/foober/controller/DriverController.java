@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -69,10 +70,22 @@ public class DriverController {
                     image.getOriginalFilename()));
         }
     }
-    
+
     @GetMapping("/active-ride")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<ActiveRideDto> getActiveRide(@CurrentUser LocalUser user) {
         return new ApiResponse<>(this.driverService.getActiveRide(user.getUser()));
+    }
+
+    @PostMapping(value = "/signup", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<ActiveRideDto> signup(@Valid @RequestPart("registrationRequest") DriverSignUpRequest signUpRequest, @RequestPart(value = "image", required=false) MultipartFile image) {
+        try {
+            this.driverService.registerNewDriver(signUpRequest, image);
+            return new ApiResponse<>("Successfully registered the driver.");
+        } catch (IOException e) {
+            return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Could not upload the file: %s!",
+                    image.getOriginalFilename()));
+        }
     }
 }
