@@ -109,8 +109,8 @@ public class DriverController {
         Driver driver = (Driver) user.getUser();
         this.driverService.simulateDrive(driver.getVehicle(), waypoints);
         this.simpMessagingTemplate.convertAndSend(
-            "/driver/ride-finished/"+driver.getUsername(),
-            "You have arrived to destination."
+            "/driver/arrived-to-destination/"+driver.getUsername(),
+            "You have arrived to your destination."
         );
     }
 
