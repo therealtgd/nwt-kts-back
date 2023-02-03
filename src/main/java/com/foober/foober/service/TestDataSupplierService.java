@@ -16,12 +16,15 @@ import java.util.Set;
 @Component
 @AllArgsConstructor
 public class TestDataSupplierService implements CommandLineRunner {
+    public static final long MINUTE = 60 * 1000;
+    public static final long DAY = 24 * 60 * MINUTE;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final VehicleRepository vehicleRepository;
     private final RideRepository rideRepository;
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final ReviewRepository reviewRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -40,15 +43,29 @@ public class TestDataSupplierService implements CommandLineRunner {
                 0.96,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 15 * 60 * 1000,
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000
+                System.currentTimeMillis() - 2 * DAY - 15 * MINUTE,
+                System.currentTimeMillis() - 2 * DAY
                 );
+        Review review0 = new Review(
+                3,
+                3,
+                "I mean it's aight",
+                ride, client2,
+                System.currentTimeMillis() - 1 * DAY - 93 * MINUTE);
+        Review review1 = new Review(
+                3,
+                4,
+                "Not too bad",
+                ride, client,
+                System.currentTimeMillis() - 1 * DAY - 93 * MINUTE);
         ride = rideRepository.save(ride);
         ride.addClient(client);
         ride.addClient(client2);
         addressRepository.saveAll(ride.getRoute());
         client = userRepository.save(client);
         client2 = userRepository.save(client2);
+        reviewRepository.save(review0);
+        reviewRepository.save(review1);
 
         Ride ride2 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 2"),
@@ -57,15 +74,22 @@ public class TestDataSupplierService implements CommandLineRunner {
                 1.82,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 45 * 60 * 1000,
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 30 * 60 * 1000
+                System.currentTimeMillis() - 2 * DAY - 45 * MINUTE,
+                System.currentTimeMillis() - 2 * DAY - 30 * MINUTE
         );
+        Review review2 = new Review(
+                5,
+                4,
+                "",
+                ride2, client,
+                System.currentTimeMillis() - 2 * DAY - 2 * MINUTE);
         ride2 = rideRepository.save(ride2);
         ride2.addClient(client);
         ride2.addClient(client2);
         addressRepository.saveAll(ride2.getRoute());
         client = userRepository.save(client);
         client2 = userRepository.save(client2);
+        reviewRepository.save(review2);
 
         Ride ride3 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 3"),
@@ -74,13 +98,21 @@ public class TestDataSupplierService implements CommandLineRunner {
                 2.4,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 90 * 60 * 1000,
-                System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000 - 75 * 60 * 1000
+                System.currentTimeMillis() - 2 * DAY - 90 * MINUTE,
+                System.currentTimeMillis() - 2 * DAY - 75 * MINUTE
         );
+        Review review3 = new Review(
+                5,
+                5,
+                "What can I say. Amazing ride!",
+                ride3, client,
+                System.currentTimeMillis() - 1 * DAY - 23 * MINUTE);
         ride3.addClient(client);
         ride3 = rideRepository.save(ride3);
         addressRepository.saveAll(ride3.getRoute());
         client = userRepository.save(client);
+        reviewRepository.save(review3);
+
 
         Ride ride4 = new Ride(
                 Set.of(new Address(1, 0, 0, "Puskinova 4"),
@@ -89,13 +121,21 @@ public class TestDataSupplierService implements CommandLineRunner {
                 3.78,
                 RideStatus.COMPLETED,
                 (Driver) userRepository.findByUsername("testdriver1").orElseThrow(),
-                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 120 * 60 * 1000,
-                System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 - 95 * 60 * 1000
+                System.currentTimeMillis() - 3 * DAY - 120 * MINUTE,
+                System.currentTimeMillis() - 3 * DAY - 95 * MINUTE
         );
+        Review review4 = new Review(
+                4,
+                3,
+                "The ride was okay. The car was a bit dirty.",
+                ride4, client,
+                System.currentTimeMillis() - 3 * DAY - 93 * MINUTE);
+
         ride4.addClient(client);
         ride4 = rideRepository.save(ride4);
         addressRepository.saveAll(ride4.getRoute());
         userRepository.save(client);
+        reviewRepository.save(review4);
     }
 
     private void initializeUsers() {

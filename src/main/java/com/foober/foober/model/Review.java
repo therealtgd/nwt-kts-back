@@ -37,4 +37,13 @@ public class Review {
         this.client = client;
         this.timeStamp = System.currentTimeMillis();
     }
+
+    public Review(int driverRating, int vehicleRating, String comment, Ride ride, Client client, Long timeStamp) {
+        this.driverRating = driverRating;
+        this.vehicleRating = vehicleRating;
+        this.comment = comment;
+        this.ride = ride;
+        this.client = client;
+        this.timeStamp = timeStamp;
+    }
 }
