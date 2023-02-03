@@ -2,6 +2,7 @@ package com.foober.foober.service;
 
 import com.foober.foober.dto.ActiveRideDto;
 import com.foober.foober.dto.ReportDto;
+import com.foober.foober.dto.ReviewDto;
 import com.foober.foober.dto.RideCancellationDto;
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.exception.*;
@@ -10,10 +11,7 @@ import com.foober.foober.model.enumeration.ClientStatus;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
-import com.foober.foober.repos.CancellationReasonRepository;
-import com.foober.foober.repos.ClientRepository;
-import com.foober.foober.repos.DriverRepository;
-import com.foober.foober.repos.RideRepository;
+import com.foober.foober.repos.*;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
@@ -39,12 +37,14 @@ public class RideService {
     private final DriverRepository driverRepository;
     private final ClientRepository clientRepository;
     private final CancellationReasonRepository cancellationRepository;
+    private final ReviewRepository reviewRepository;
 
-    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository, CancellationReasonRepository cancellationRepository) {
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository, CancellationReasonRepository cancellationRepository, ReviewRepository reviewRepository) {
         this.rideRepository = rideRepository;
         this.driverRepository = driverRepository;
         this.clientRepository = clientRepository;
         this.cancellationRepository = cancellationRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public int getPrice(String vehicleType, int distance) throws IllegalArgumentException {
@@ -363,5 +363,14 @@ public class RideService {
 
     public Set<Client> getRideClients(long id) {
         return rideRepository.getById(id).getClients();
+    }
+
+    public void reviewRide(long rideId, ReviewDto reviewDto, User user) {
+        Ride ride = rideRepository.getById(rideId);
+        long threeDaysAgo = System.currentTimeMillis() - (3 * 24 * 60 * 60 * 1000);
+        if (ride.getEndTime() <= threeDaysAgo) {
+            throw new ReviewPeriodExpired();
+        }
+        reviewRepository.save(new Review(reviewDto, ride, (Client) user));
     }
 }

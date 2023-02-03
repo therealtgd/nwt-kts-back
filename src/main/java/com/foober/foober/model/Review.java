@@ -1,10 +1,10 @@
 package com.foober.foober.model;
 
-import javax.persistence.*;
+import com.foober.foober.dto.ReviewDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +15,11 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private int rating;
+    private int driverRating;
+    @Column(nullable = false)
+    private int vehicleRating;
+    @Column(nullable = false)
+    private String comment;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ride_id", nullable = false)
     private Ride ride;
@@ -25,13 +29,12 @@ public class Review {
     @Column(nullable = false)
     private Long timeStamp;
 
-    public Review(int rating,
-                  Ride ride,
-                  Client client,
-                  Long timeStamp) {
-        this.rating = rating;
+    public Review(ReviewDto reviewDto, Ride ride, Client client) {
+        this.driverRating = reviewDto.getDriverRating();
+        this.vehicleRating = reviewDto.getVehicleRating();
+        this.comment = reviewDto.getComment();
         this.ride = ride;
         this.client = client;
-        this.timeStamp = timeStamp;
+        this.timeStamp = System.currentTimeMillis();
     }
 }

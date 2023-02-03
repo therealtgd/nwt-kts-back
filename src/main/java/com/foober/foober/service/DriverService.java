@@ -72,7 +72,7 @@ public class DriverService {
 
     private double getRideReview(Ride ride) {
         List<Review> reviews = reviewRepository.getReviewsByRide(ride);
-        int sum = reviews.stream().mapToInt(Review::getRating).sum();
+        int sum = reviews.stream().mapToInt(Review::getDriverRating).sum();
         if (sum == 0) {
             return 0;
         }
