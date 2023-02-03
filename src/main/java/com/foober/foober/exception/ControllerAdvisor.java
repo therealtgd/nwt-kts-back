@@ -141,4 +141,10 @@ public class ControllerAdvisor {
         return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ReviewPeriodExpired.class)
+    public ApiResponse<?> handleReviewWindowExpired(ReviewPeriodExpired e) {
+        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "The review period expired.");
+    }
+
 }

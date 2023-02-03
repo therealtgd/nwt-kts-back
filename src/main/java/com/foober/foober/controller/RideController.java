@@ -152,4 +152,11 @@ public class RideController {
         return new ApiResponse<>(rideService.getDriverEta(user.getUser()));
     }
 
+    @PostMapping("/{id}/review")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<?> postReview(@CurrentUser LocalUser user, @RequestParam long id, @RequestBody ReviewDto reviewDto) {
+        rideService.reviewRide(id, reviewDto, user.getUser());
+        return new ApiResponse<>(HttpStatus.OK);
+    }
+
 }
