@@ -29,4 +29,5 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     @Query("SELECT DISTINCT r FROM Ride r WHERE r.status = 'ON_ROUTE' OR r.status = 'IN_PROGRESS' and r.driver.id = ?1")
     Optional<Ride> getInProgressRideByClientId(Long id);
 
+    Optional<Ride> getRideByStatusAndDriverId(RideStatus rideStatus, Long id);
 }
