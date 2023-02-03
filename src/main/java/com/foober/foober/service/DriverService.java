@@ -244,35 +244,37 @@ public class DriverService {
         }
 
         Vehicle vehicle = new Vehicle(
-                signUpRequest.getLicencePlate(),
-                signUpRequest.getCapacity(),
-                signUpRequest.isPetsAllowed(),
-                signUpRequest.isBabiesAllowed(),
-                VehicleType.valueOf(signUpRequest.getVehicleType())
+            signUpRequest.getLicencePlate(),
+            signUpRequest.getCapacity(),
+            signUpRequest.isPetsAllowed(),
+            signUpRequest.isBabiesAllowed(),
+            VehicleType.valueOf(signUpRequest.getVehicleType())
         );
         vehicle = vehicleRepository.save(vehicle);
 
         Driver driver = new Driver(
-                signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                signUpRequest.getPassword(),
-                signUpRequest.getDisplayName(),
-                signUpRequest.getPhoneNumber(),
-                signUpRequest.getCity(),
-                roles,
-                vehicle
+            signUpRequest.getUsername(),
+            signUpRequest.getEmail(),
+            signUpRequest.getPassword(),
+            signUpRequest.getDisplayName(),
+            signUpRequest.getPhoneNumber(),
+            signUpRequest.getCity(),
+            roles,
+            vehicle
         );
         driver = driverRepository.save(driver);
 
         if (signUpRequest.isImageUploaded()) {
             Image image = new Image(
-                    StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())),
-                    file.getContentType(),
-                    file.getSize(),
-                    file.getBytes()
+                StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())),
+                file.getContentType(),
+                file.getSize(),
+                file.getBytes()
             );
             driver.setImage(image);
             driverRepository.save(driver);
+        }
+    }
 
     public void simulateDrive(Vehicle vehicle, ArrayList<LatLng> waypoints) {
         Random generator = new Random();
