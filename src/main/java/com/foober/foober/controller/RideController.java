@@ -7,6 +7,7 @@ import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.Client;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.enumeration.DriverStatus;
+import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.service.DriverService;
 import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
@@ -60,8 +61,17 @@ public class RideController {
     @PutMapping("/{id}/finish")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<?> finishRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
-        this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);
-        return new ApiResponse<>(this.rideService.finishRide(id));
+        long ms = this.rideService.finishRide(id);
+        ActiveRideDto ride = this.driverService.getNextRide((Driver) user.getUser());
+        if (ride != null) {
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/active-ride/"+ride.getDriver().getUsername(),
+                    ride
+            );
+        } else {
+            this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);
+        }
+        return new ApiResponse<>(ms);
     }
 
     @Transactional
@@ -102,10 +112,19 @@ public class RideController {
     @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<ActiveRideDto> orderRide(@RequestBody RideInfoDto rideInfoDto) {
         ActiveRideDto ride = this.rideService.orderRide(rideInfoDto);
-        this.simpMessagingTemplate.convertAndSend(
-                "/driver/ride-assigned/"+ride.getDriver().getUsername(),
-                ride
-        );
+        // If the driver is in an active ride, notify them that they have a ride waiting after this one
+        if (ride.getRideStatus() == RideStatus.WAITING) {
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/ride-assigned/"+ride.getDriver().getUsername(),
+                    ride
+            );
+        } else { // Else notify the driver that they have a ride and set the ride status to ON_ROUTE and driver status to BUSY
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/active-ride/"+ride.getDriver().getUsername(),
+                    ride
+            );
+        }
+
         return new ApiResponse<>(ride);
     }
 

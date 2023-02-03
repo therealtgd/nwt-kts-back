@@ -2,6 +2,7 @@ package com.foober.foober.dto;
 
 import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.model.Ride;
+import com.foober.foober.model.enumeration.RideStatus;
 import lombok.Data;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ActiveRideDto {
     private long eta;
     private long startTime;
     private long endTime;
+    private RideStatus rideStatus;
 
     public ActiveRideDto(Ride ride) {
         this.id = ride.getId();
@@ -34,5 +36,6 @@ public class ActiveRideDto {
         this.eta = ride.getEta();
         this.startTime = ride.getStartTime();
         this.endTime = ride.getEndTime();
+        this.rideStatus = ride.getStatus();
     }
 }

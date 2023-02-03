@@ -88,29 +88,27 @@ public class RideService {
         return rideList;
     }
 
+    /**
+     * Create a new ride.
+     *
+     * @param  rideInfoDto ride information sent from FE client
+     * @return true if the driver is AVAILABLE; false if he is BUSY
+     */
     public ActiveRideDto orderRide(RideInfoDto rideInfoDto) {
         Set<Client> clients = getClients(rideInfoDto);
         Driver driver = getDriver(rideInfoDto);
         Set<Address> route = getRoute(rideInfoDto);
+
         Ride ride = new Ride(driver, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
+
         clients.forEach(ride::addClient);
         clients.forEach(c -> c.setStatus(ClientStatus.IN_RIDE));
         try {
-            long eta = 0L;
+            long eta;
             if (driver.getStatus().equals(DriverStatus.BUSY)) {
-                long activeRideTimeUntilEnd = this.getTimeLeftOnRoute(
-                        driver.getVehicle().getLatitude(),
-                        driver.getVehicle().getLongitude(),
-                        rideInfoDto.getEndAddress().getCoordinates().getLat(),
-                        rideInfoDto.getEndAddress().getCoordinates().getLng()
-                );
-                long newRideDriverEta = this.getTimeLeftOnRoute(
-                        rideInfoDto.getEndAddress().getCoordinates().getLat(),
-                        rideInfoDto.getEndAddress().getCoordinates().getLng(),
-                        rideInfoDto.getStartAddress().getCoordinates().getLat(),
-                        rideInfoDto.getStartAddress().getCoordinates().getLng()
-                );
-                eta = activeRideTimeUntilEnd + newRideDriverEta;
+                eta = getBusyDriverEta(rideInfoDto, driver);
+
+                ride.setStatus(RideStatus.WAITING); // If the driver is already in an active ride, this ride has to WAIT until he completes it
             } else {
                 eta = this.getTimeLeftOnRoute(
                         driver.getVehicle().getLatitude(),
@@ -118,15 +116,36 @@ public class RideService {
                         rideInfoDto.getStartAddress().getCoordinates().getLat(),
                         rideInfoDto.getStartAddress().getCoordinates().getLng()
                 );
+
+                ride.setStatus(RideStatus.ON_ROUTE);
+                driver.setStatus(DriverStatus.BUSY);
             }
             ride.setEta(eta);
 
             ride = rideRepository.save(ride);
             clientRepository.saveAll(clients);
+            driverRepository.save(driver);
+
             return new ActiveRideDto(ride);
         } catch (Exception e) {
             throw new UnableToGetDriverEtaException();
         }
+    }
+
+    private long getBusyDriverEta(RideInfoDto rideInfoDto, Driver driver) throws Exception {
+        long activeRideTimeUntilEnd = this.getTimeLeftOnRoute(
+                driver.getVehicle().getLatitude(),
+                driver.getVehicle().getLongitude(),
+                rideInfoDto.getEndAddress().getCoordinates().getLat(),
+                rideInfoDto.getEndAddress().getCoordinates().getLng()
+        );
+        long newRideDriverEta = this.getTimeLeftOnRoute(
+                rideInfoDto.getEndAddress().getCoordinates().getLat(),
+                rideInfoDto.getEndAddress().getCoordinates().getLng(),
+                rideInfoDto.getStartAddress().getCoordinates().getLat(),
+                rideInfoDto.getStartAddress().getCoordinates().getLng()
+        );
+        return activeRideTimeUntilEnd + newRideDriverEta;
     }
 
     private static Set<Address> getRoute(RideInfoDto rideInfoDto) {

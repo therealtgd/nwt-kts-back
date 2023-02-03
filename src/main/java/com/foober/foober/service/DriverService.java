@@ -283,5 +283,18 @@ public class DriverService {
             this.vehicleService.updateVehicleLocation(vehicle, waypoint);
         }
     }
+
+    public ActiveRideDto getNextRide(Driver driver) {
+        Ride ride = rideRepository.getRideByStatusAndDriverId(RideStatus.WAITING, driver.getId()).orElse(null);
+        ActiveRideDto rideDto = null;
+        if (ride != null) {
+            ride.setStatus(RideStatus.ON_ROUTE);
+            driver.setStatus(DriverStatus.BUSY);
+            rideDto = new ActiveRideDto(ride);
+        } else {
+
+        }
+        return rideDto;
+    }
 }
 
