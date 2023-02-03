@@ -399,7 +399,8 @@ public class RideService {
             if ((user instanceof Client && ride.getClients().stream().anyMatch(c -> c.getId().equals(user.getId()))) ||
                 (user instanceof Driver && ride.getDriver().getId().equals(user.getId()) || user instanceof Admin)) {
                 DetailedRideDto dto = new DetailedRideDto(ride);
-                dto.setRating(getRideRating(ride));
+                dto.setDriverRating(getRideDriverRating(ride));
+                dto.setVehicleRating(getRideVehicleRating(ride));
                 dto.setReviews(reviewsToDto(reviewRepository.getReviewsByRide(ride)));
                 dto.setStops(getStops(ride));
                 return dto;
@@ -426,9 +427,20 @@ public class RideService {
         return dtos;
     }
 
-    public  double getRideRating(Ride ride) {
+    public  double getRideDriverRating(Ride ride) {
         List<Review> reviews = reviewRepository.getReviewsByRide(ride);
-        int sum = reviews.stream().mapToInt(Review::getRating).sum();
+        int sum = reviews.stream().mapToInt(Review::getDriverRating).sum();
+        if (sum == 0) {
+            return 0;
+        }
+        else {
+            return 1.0 * sum / reviews.size();
+        }
+    }
+
+    public  double getRideVehicleRating(Ride ride) {
+        List<Review> reviews = reviewRepository.getReviewsByRide(ride);
+        int sum = reviews.stream().mapToInt(Review::getVehicleRating).sum();
         if (sum == 0) {
             return 0;
         }

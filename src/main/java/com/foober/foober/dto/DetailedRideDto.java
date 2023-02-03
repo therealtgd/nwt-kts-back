@@ -21,7 +21,8 @@ public class DetailedRideDto {
     private List<AddressDto> stops;
     private List<ReviewDto> reviews;
     private double price;
-    private double rating;
+    private double vehicleRating;
+    private double driverRating;
     private String startTime;
     private String endTime;
 

@@ -13,24 +13,12 @@ import static com.foober.foober.util.SortUtils.stringToDate;
 public class SortUtils {
     public static List<RideBriefDisplay> sort(List<RideBriefDisplay> unsorted, String criteria) {
         switch (criteria) {
-            case "route-↓":
-                unsorted.sort(new RouteAscComparator());
-                break;
-            case "route-↑":
-                unsorted.sort(new RouteDescComparator());
-                break;
-            case "price-↓":
-                unsorted.sort(new PriceAscComparator());
-                break;
-            case "price-↑":
-                unsorted.sort(new PriceDescComparator());
-                break;
-            case "date departed-↓":
-                unsorted.sort(new DateAscComparator());
-                break;
-            case "date departed-↑":
-                unsorted.sort(new DateDescComparator());
-                break;
+            case "route-↓" -> unsorted.sort(new RouteAscComparator());
+            case "route-↑" -> unsorted.sort(new RouteDescComparator());
+            case "price-↓" -> unsorted.sort(new PriceAscComparator());
+            case "price-↑" -> unsorted.sort(new PriceDescComparator());
+            case "date departed-↓" -> unsorted.sort(new DateAscComparator());
+            case "date departed-↑" -> unsorted.sort(new DateDescComparator());
         }
         return unsorted;
     }

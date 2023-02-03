@@ -65,20 +65,9 @@ public class DriverService {
         var ref = new Object() {
             List<RideBriefDisplay> rides = new ArrayList<>();
         };
-        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, rideService.getRideRating(ride))));
+        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, rideService.getRideDriverRating(ride))));
         ref.rides = sort(ref.rides, criteria);
         return ref.rides;
-    }
-
-    private double getRideReview(Ride ride) {
-        List<Review> reviews = reviewRepository.getReviewsByRide(ride);
-        int sum = reviews.stream().mapToInt(Review::getDriverRating).sum();
-        if (sum == 0) {
-            return 0;
-        }
-        else {
-            return 1.0 * sum / reviews.size();
-        }
     }
     
     @Transactional
