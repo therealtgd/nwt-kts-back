@@ -21,6 +21,11 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/map-updates", "/support-chat", "/driver", "/client");
+        registry.enableSimpleBroker(
+                "/map-updates",
+                "/support-chat",
+                "/driver",
+                "/client"
+        );
     }
 }

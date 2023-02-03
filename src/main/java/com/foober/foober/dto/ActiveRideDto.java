@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class ActiveRideDto {
+    private long id;
     private DriverDto driver;
     private AddressDto startAddress;
     private AddressDto endAddress;
@@ -17,8 +18,11 @@ public class ActiveRideDto {
     private List<AddressDto> stops;
     private double price;
     private long eta;
+    private long startTime;
+    private long endTime;
 
     public ActiveRideDto(Ride ride) {
+        this.id = ride.getId();
         this.distance = ride.getDistance();
         this.duration = ride.getEta();
         this.startAddress = new AddressDto(ride.getStartAddress());
@@ -28,5 +32,7 @@ public class ActiveRideDto {
         this.price = ride.getPrice();
         this.clients = ride.getClients().stream().map(UserBriefDisplay::new).toList();
         this.eta = ride.getEta();
+        this.startTime = ride.getStartTime();
+        this.endTime = ride.getEndTime();
     }
 }

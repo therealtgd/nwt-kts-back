@@ -42,7 +42,7 @@ public class DriverController {
         return new ApiResponse<>(this.driverService.getAllByStatus(status, user != null ? user.getUser() : null));
     }
     
-    @GetMapping("/rides")
+    @GetMapping("/rides/{criteria}")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<List<RideBriefDisplay>> getRides(@CurrentUser LocalUser user, @PathVariable String criteria) {
         return new ApiResponse<>(driverService.getRides(user.getUser(), criteria));
