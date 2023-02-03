@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +45,7 @@ public class DriverService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final VehicleService vehicleService;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -244,7 +247,7 @@ public class DriverService {
         Driver driver = new Driver(
             signUpRequest.getUsername(),
             signUpRequest.getEmail(),
-            signUpRequest.getPassword(),
+            passwordEncoder.encode(signUpRequest.getPassword()),
             signUpRequest.getDisplayName(),
             signUpRequest.getPhoneNumber(),
             signUpRequest.getCity(),

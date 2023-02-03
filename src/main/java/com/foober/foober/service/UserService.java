@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,6 +68,9 @@ public class UserService {
                         file.getBytes()
                 );
                 client.setImage(image);
+            }
+            if (signUpRequest.getSocialProvider() == SocialProvider.LOCAL) {
+                client.setActivated(false);
             }
             client = userRepository.save(client);
             String token = tokenUtils.generateConfirmationToken(client);
@@ -265,5 +269,13 @@ public class UserService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public boolean isActivated(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        if (user instanceof Client client) {
+            return client.isActivated() && client.isEnabled();
+        }
+        return true;
     }
 }
