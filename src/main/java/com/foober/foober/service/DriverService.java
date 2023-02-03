@@ -65,7 +65,7 @@ public class DriverService {
         var ref = new Object() {
             List<RideBriefDisplay> rides = new ArrayList<>();
         };
-        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, getRideReview(ride))));
+        driver.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).forEach(ride -> ref.rides.add(DtoConverter.rideToBriefDisplay(ride, rideService.getRideRating(ride))));
         ref.rides = sort(ref.rides, criteria);
         return ref.rides;
     }

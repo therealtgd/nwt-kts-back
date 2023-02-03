@@ -1,9 +1,11 @@
 package com.foober.foober.service;
 
 import com.foober.foober.dto.ActiveRideDto;
+import com.foober.foober.dto.DetailedRideDto;
 import com.foober.foober.dto.ReportDto;
 import com.foober.foober.dto.ReviewDto;
 import com.foober.foober.dto.RideCancellationDto;
+import com.foober.foober.dto.ReviewDto;
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.exception.*;
 import com.foober.foober.model.*;
@@ -392,4 +394,40 @@ public class RideService {
         }
         reviewRepository.save(new Review(reviewDto, ride, (Client) user));
     }
+    
+    public DetailedRideDto getRide(User user, Long id) {
+        try {
+            Ride ride = rideRepository.getById(id);
+            if ((user instanceof Client && ride.getClients().stream().anyMatch(c -> c.getId().equals(user.getId()))) ||
+                (user instanceof Driver && ride.getDriver().getId().equals(user.getId()) || user instanceof Admin)) {
+                DetailedRideDto dto = new DetailedRideDto(ride);
+                dto.setRating(getRideRating(ride));
+                dto.setReviews(reviewsToDto(reviewRepository.getReviewsByRide(ride)));
+                return dto;
+            }
+            else {
+                throw new NoSuchElementException("You are not authorized to access this ride.");
+            }
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException("That ride doesn't exist.");
+        }
+    }
+    
+    private List<ReviewDto> reviewsToDto (List<Review> reviews) {
+        ArrayList<ReviewDto> dtos = new ArrayList<>();
+        reviews.forEach(r -> dtos.add(new ReviewDto(r)));
+        return dtos;
+    }
+
+    public  double getRideRating(Ride ride) {
+        List<Review> reviews = reviewRepository.getReviewsByRide(ride);
+        int sum = reviews.stream().mapToInt(Review::getRating).sum();
+        if (sum == 0) {
+            return 0;
+        }
+        else {
+            return 1.0 * sum / reviews.size();
+        }
+    }
+
 }
