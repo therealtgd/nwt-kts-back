@@ -42,19 +42,16 @@ public class RideController {
         }
     }
 
-    @PutMapping("/{id}/accept")
-    @PreAuthorize("hasRole('ROLE_DRIVER')")
-    public ApiResponse<?> acceptRide(@CurrentUser LocalUser user, @PathVariable("id") String id) {
-        this.driverService.updateStatus(user.getUser().getId(), DriverStatus.BUSY);
-        // TODO: Set ride status to ON_ROUTE
-        return new ApiResponse<>(HttpStatus.OK);
-    }
-
     @PutMapping("/{id}/start")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<Long> startRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
         this.driverService.updateStatus(user.getUser().getId(), DriverStatus.BUSY);
-        return new ApiResponse<>(this.rideService.startRide(id));
+        long startTime = this.rideService.startRide(id);
+        this.simpMessagingTemplate.convertAndSend(
+            "/driver/ride-started/"+user.getUser().getUsername(),
+            this.driverService.getCurrentRideByDriver((Driver) user.getUser())
+        );
+        return new ApiResponse<>(startTime);
     }
 
     @Transactional

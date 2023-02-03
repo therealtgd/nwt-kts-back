@@ -286,15 +286,19 @@ public class DriverService {
 
     public ActiveRideDto getNextRide(Driver driver) {
         Ride ride = rideRepository.getRideByStatusAndDriverId(RideStatus.WAITING, driver.getId()).orElse(null);
-        ActiveRideDto rideDto = null;
         if (ride != null) {
             ride.setStatus(RideStatus.ON_ROUTE);
             driver.setStatus(DriverStatus.BUSY);
-            rideDto = new ActiveRideDto(ride);
-        } else {
-
+            this.rideRepository.save(ride);
+            this.driverRepository.save(driver);
+            return new ActiveRideDto(ride);
         }
-        return rideDto;
+        return null;
+    }
+
+    public ActiveRideDto getCurrentRideByDriver(Driver driver) {
+        Ride ride = rideRepository.getRideByStatusAndDriverId(RideStatus.IN_PROGRESS, driver.getId()).orElseThrow();
+        return new ActiveRideDto(ride);
     }
 }
 
