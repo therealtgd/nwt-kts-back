@@ -124,22 +124,12 @@ public class DriverService {
     }
 
     @Scheduled(fixedRate = 1000)
-    public void sendVehiclePositions() {
-        List<Driver> drivers = this.driverRepository.findAllActive();
-        List<VehicleDto> vehicleDtos = new ArrayList<>();
-        for (Driver driver: drivers) {
-            Vehicle vehicle = driver.getVehicle();
-            vehicleDtos.add(
-                new VehicleDto(
-                    vehicle.getId(),
-                    new LatLng(vehicle.getLatitude(), vehicle.getLongitude())
-                )
-            );
-        }
-        if (vehicleDtos.size() > 0) {
+    public void sendDriversStatusAndPosition() {
+        List<DriverDto> driverDtos = this.driverRepository.findAllActive().stream().map(DriverDto::new).toList();
+        if (driverDtos.size() > 0) {
             this.simpMessagingTemplate.convertAndSend(
-                "/map-updates/update-vehicle-positions",
-                vehicleDtos
+                "/map-updates/update-drivers-status-and-position",
+                driverDtos
             );
         }
     }
