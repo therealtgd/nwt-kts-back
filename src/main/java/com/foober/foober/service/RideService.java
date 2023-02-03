@@ -2,6 +2,7 @@ package com.foober.foober.service;
 
 import com.foober.foober.dto.ActiveRideDto;
 import com.foober.foober.dto.ReportDto;
+import com.foober.foober.dto.RideCancellationDto;
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.exception.*;
 import com.foober.foober.model.*;
@@ -9,6 +10,7 @@ import com.foober.foober.model.enumeration.ClientStatus;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
+import com.foober.foober.repos.CancellationReasonRepository;
 import com.foober.foober.repos.ClientRepository;
 import com.foober.foober.repos.DriverRepository;
 import com.foober.foober.repos.RideRepository;
@@ -20,6 +22,7 @@ import com.google.maps.model.TravelMode;
 import com.google.maps.model.Unit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,11 +38,13 @@ public class RideService {
     private final RideRepository rideRepository;
     private final DriverRepository driverRepository;
     private final ClientRepository clientRepository;
+    private final CancellationReasonRepository cancellationRepository;
 
-    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository) {
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository, CancellationReasonRepository cancellationRepository) {
         this.rideRepository = rideRepository;
         this.driverRepository = driverRepository;
         this.clientRepository = clientRepository;
+        this.cancellationRepository = cancellationRepository;
     }
 
     public int getPrice(String vehicleType, int distance) throws IllegalArgumentException {
@@ -319,5 +324,44 @@ public class RideService {
         } catch (Exception e) {
             throw new UnableToGetDriverEtaException();
         }
+    }
+
+    @Transactional
+    public long startRide(long id) {
+        Ride ride = rideRepository.getById(id);
+        ride.setStatus(RideStatus.IN_PROGRESS);
+        long startTime = System.currentTimeMillis();
+        ride.setStartTime(startTime);
+        rideRepository.save(ride);
+        return startTime;
+    }
+
+    @Transactional
+    public long finishRide(long id) {
+        Ride ride = rideRepository.getById(id);
+        ride.setStatus(RideStatus.COMPLETED);
+        long endTime = System.currentTimeMillis();
+        ride.setEndTime(endTime);
+        rideRepository.save(ride);
+        return endTime;
+    }
+
+    public void endRide(long id, RideCancellationDto rideCancellationDto) {
+        Ride ride = rideRepository.getById(id);
+        ride.getClients().forEach(client -> {
+            client.setStatus(ClientStatus.ONLINE);
+            client.setCredits((int) Math.round(client.getCredits() + ride.getPrice() / ride.getClients().size()));
+        });
+        ride.setStatus(RideStatus.CANCELLED);
+        CancellationReason cancellationReason = new CancellationReason(rideCancellationDto.getReason(), ride);
+        cancellationRepository.save(cancellationReason);
+        long endTime = System.currentTimeMillis();
+        ride.setEndTime(endTime);
+        rideRepository.save(ride);
+        clientRepository.saveAll(ride.getClients());
+    }
+
+    public Set<Client> getRideClients(long id) {
+        return rideRepository.getById(id).getClients();
     }
 }

@@ -5,6 +5,8 @@ import com.foober.foober.model.enumeration.DriverStatus;
 import lombok.Data;
 import org.apache.tomcat.util.codec.binary.Base64;
 
+import static com.foober.foober.util.GeneralUtils.TEMPLATE_IMAGE;
+
 @Data
 public class DriverDto {
     private Long id;
@@ -24,7 +26,7 @@ public class DriverDto {
         this.enabled = driver.isEnabled();
         this.status = driver.getStatus();
         this.vehicle = new VehicleDto(driver.getVehicle());
-        this.image = driver.getImage() != null ? Base64.encodeBase64String(driver.getImage().getData()) : null;
+        this.image = driver.getImage() != null ? Base64.encodeBase64String(driver.getImage().getData()) : TEMPLATE_IMAGE;
     }
 
 }

@@ -1,10 +1,7 @@
 package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
-import com.foober.foober.dto.ActiveRideDto;
-import com.foober.foober.dto.ApiResponse;
-import com.foober.foober.dto.LocalUser;
-import com.foober.foober.dto.ReportDto;
+import com.foober.foober.dto.*;
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.Client;
@@ -52,12 +49,35 @@ public class RideController {
         return new ApiResponse<>(HttpStatus.OK);
     }
 
+    @PutMapping("/{id}/start")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public ApiResponse<Long> startRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
+        this.driverService.updateStatus(user.getUser().getId(), DriverStatus.BUSY);
+        return new ApiResponse<>(this.rideService.startRide(id));
+    }
+
+    @Transactional
+    @PutMapping("/{id}/finish")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public ApiResponse<?> finishRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
+        this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);
+        return new ApiResponse<>(this.rideService.finishRide(id));
+    }
+
     @Transactional
     @PutMapping("/{id}/end")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
-    public ApiResponse<?> endRide(@CurrentUser LocalUser user, @PathVariable("id") String id) {
+    public ApiResponse<?> endRide(@CurrentUser LocalUser user,
+                                  @PathVariable("id") long id,
+                                  @RequestBody RideCancellationDto rideCancellationDto
+    ) {
         this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);
-        // TODO: Set ride status to FINISHED
+        this.rideService.endRide(id, rideCancellationDto);
+        for (Client c : rideService.getRideClients(id))
+            this.simpMessagingTemplate.convertAndSend(
+                    "/client/ride-cancelled/"+c.getUsername(),
+                    "The driver cancelled your ride.\nYour tokens have been refunded."
+            );
         return new ApiResponse<>(HttpStatus.OK);
     }
 
@@ -70,11 +90,12 @@ public class RideController {
             @RequestParam(value="lat") double lat,
             @RequestParam(value="lng") double lng
     ) {
+        SimpleDriverDto simpleDriverDto = driverService.getNearestFreeDriver(vehicleType, petsAllowed, babiesAllowed, lat, lng);
         this.simpMessagingTemplate.convertAndSend(
-                "/driver/reserved",
+                "/driver/reserved/"+simpleDriverDto.getUsername(),
                 "You have been reserved for a ride."
         );
-        return new ApiResponse<>(driverService.getNearestFreeDriver(vehicleType, petsAllowed, babiesAllowed, lat, lng));
+        return new ApiResponse<>(simpleDriverDto);
     }
 
     @PostMapping("/order")
@@ -82,7 +103,7 @@ public class RideController {
     public ApiResponse<ActiveRideDto> orderRide(@RequestBody RideInfoDto rideInfoDto) {
         ActiveRideDto ride = this.rideService.orderRide(rideInfoDto);
         this.simpMessagingTemplate.convertAndSend(
-                "/driver/ride-assigned",
+                "/driver/ride-assigned/"+ride.getDriver().getUsername(),
                 ride
         );
         return new ApiResponse<>(ride);
@@ -111,4 +132,5 @@ public class RideController {
     public ApiResponse<Long> getDriverEta(@CurrentUser LocalUser user) {
         return new ApiResponse<>(rideService.getDriverEta(user.getUser()));
     }
+
 }
