@@ -1,11 +1,7 @@
 package com.foober.foober.service;
 
-import com.foober.foober.dto.ActiveRideDto;
-import com.foober.foober.dto.DetailedRideDto;
-import com.foober.foober.dto.ReportDto;
-import com.foober.foober.dto.ReviewDto;
-import com.foober.foober.dto.RideCancellationDto;
-import com.foober.foober.dto.ReviewDto;
+import com.foober.foober.dto.*;
+import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.dto.ride.RideInfoDto;
 import com.foober.foober.exception.*;
 import com.foober.foober.model.*;
@@ -14,6 +10,7 @@ import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.*;
+import com.foober.foober.util.AddressIndexComparator;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
@@ -24,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -403,16 +401,25 @@ public class RideService {
                 DetailedRideDto dto = new DetailedRideDto(ride);
                 dto.setRating(getRideRating(ride));
                 dto.setReviews(reviewsToDto(reviewRepository.getReviewsByRide(ride)));
+                dto.setStops(getStops(ride));
                 return dto;
             }
             else {
                 throw new NoSuchElementException("You are not authorized to access this ride.");
             }
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("That ride doesn't exist.");
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException("That ride doesn't exist.");
         }
     }
-    
+
+    private List<AddressDto> getStops(Ride ride) {
+        List<AddressDto> dtos = new ArrayList<>();
+        ride.getRoute().stream().sorted(new AddressIndexComparator()).forEach(address -> dtos.add(new AddressDto(address.getStreetAddress(), new LatLng(address.getLatitude(), address.getLongitude()))));
+        return dtos;
+    }
+
     private List<ReviewDto> reviewsToDto (List<Review> reviews) {
         ArrayList<ReviewDto> dtos = new ArrayList<>();
         reviews.forEach(r -> dtos.add(new ReviewDto(r)));
