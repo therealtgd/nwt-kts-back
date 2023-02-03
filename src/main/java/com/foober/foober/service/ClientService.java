@@ -12,6 +12,7 @@ import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.repos.ClientRepository;
 import com.foober.foober.repos.RideRepository;
 import com.foober.foober.security.jwt.TokenProvider;
+import com.foober.foober.util.AddressIndexComparator;
 import com.foober.foober.util.DtoConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -114,12 +115,4 @@ public class ClientService {
                 .map(ActiveRideDto::new)
                 .orElse(null);
     }
-}
-
-class AddressIndexComparator implements Comparator<Address> {
-    @Override
-    public int compare(Address o1, Address o2) {
-        return Integer.compare(o1.getStation(), o2.getStation());
-    }
-   
 }

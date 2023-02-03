@@ -231,6 +231,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         client.setPhoneNumber("068419532");
         client.setCredits(10000000);
         client.setEnabled(true);
+        client.setActivated(true);
         userRepository.save(client);
 
         Client client2 = new Client();
@@ -245,6 +246,7 @@ public class TestDataSupplierService implements CommandLineRunner {
         client2.setPhoneNumber("068419532");
         client2.setCredits(10000000);
         client2.setEnabled(true);
+        client2.setActivated(true);
         userRepository.save(client2);
     }
 

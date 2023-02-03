@@ -2,6 +2,7 @@ package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.*;
+import com.foober.foober.exception.UserIsNotActivatedException;
 import com.foober.foober.model.User;
 import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.service.UserService;
@@ -30,6 +31,9 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ApiResponse<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        if (!userService.isActivated(loginRequest.getEmail())) {
+            throw new UserIsNotActivatedException("Bad credentials.");
+        }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.createToken(authentication);

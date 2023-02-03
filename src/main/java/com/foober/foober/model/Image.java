@@ -2,6 +2,7 @@ package com.foober.foober.model;
 
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -26,6 +27,7 @@ public class Image {
     @Column(name = "size", nullable = false)
     private Long size;
     @Lob
+    @Type(type = "org.hibernate.type.ImageType")
     @Column(name = "data", nullable = false)
     private byte[] data;
 

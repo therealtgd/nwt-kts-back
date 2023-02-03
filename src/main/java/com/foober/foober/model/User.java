@@ -35,7 +35,7 @@ public class User implements UserDetails {
     protected String city;
     @ManyToMany(fetch = FetchType.EAGER)
     protected Set<Role> authorities = new HashSet<>();
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     protected Image image;
     @Column(name="enabled", nullable = false)
