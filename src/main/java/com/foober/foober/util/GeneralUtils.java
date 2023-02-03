@@ -47,4 +47,11 @@ public class GeneralUtils {
         return new UserInfo(image, user.getDisplayName(), user.getUsername(), user.getEmail(), roles.get(0), user.getPhoneNumber(), user.getCity());
     }
 
+    public static void wait(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }

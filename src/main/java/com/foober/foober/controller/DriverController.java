@@ -2,11 +2,13 @@ package com.foober.foober.controller;
 
 import com.foober.foober.config.CurrentUser;
 import com.foober.foober.dto.*;
+import com.foober.foober.model.Driver;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.service.DriverService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(
@@ -24,6 +26,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class DriverController {
     private final DriverService driverService;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @GetMapping
     public ApiResponse<DriverDto> getDriver(@CurrentUser LocalUser user) {
@@ -88,4 +91,27 @@ public class DriverController {
                     image.getOriginalFilename()));
         }
     }
+    
+    @PostMapping("/simulate-drive-to-client")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public void simulateDriveToClient(@CurrentUser LocalUser user, @RequestBody ArrayList<LatLng> waypoints) {
+        Driver driver = (Driver) user.getUser();
+        this.driverService.simulateDrive(driver.getVehicle(), waypoints);
+        this.simpMessagingTemplate.convertAndSend(
+            "/driver/arrived-to-client/"+driver.getUsername(),
+            "You have arrived to client."
+        );
+    }
+
+    @PostMapping("/simulate-drive")
+    @PreAuthorize("hasRole('ROLE_DRIVER')")
+    public void simulateDrive(@CurrentUser LocalUser user, @RequestBody ArrayList<LatLng> waypoints) {
+        Driver driver = (Driver) user.getUser();
+        this.driverService.simulateDrive(driver.getVehicle(), waypoints);
+        this.simpMessagingTemplate.convertAndSend(
+            "/driver/ride-finished/"+driver.getUsername(),
+            "You have arrived to destination."
+        );
+    }
+
 }

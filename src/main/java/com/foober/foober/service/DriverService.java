@@ -10,6 +10,7 @@ import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import com.foober.foober.repos.*;
 import com.foober.foober.util.DtoConverter;
+import com.foober.foober.util.GeneralUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -41,6 +42,7 @@ public class DriverService {
     private final RideRepository rideRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final VehicleService vehicleService;
 
     public List<DriverDto> getActiveDriverDtos() {
         return this.driverRepository.findAllActive().stream().map(DriverDto::new).collect(Collectors.toList());
@@ -271,6 +273,12 @@ public class DriverService {
             );
             driver.setImage(image);
             driverRepository.save(driver);
+
+    public void simulateDrive(Vehicle vehicle, ArrayList<LatLng> waypoints) {
+        Random generator = new Random();
+        for (LatLng waypoint : waypoints) {
+            GeneralUtils.wait((int) ((generator.nextDouble() * (2 - 0.5) + 0.5) * 1000));
+            this.vehicleService.updateVehicleLocation(vehicle, waypoint);
         }
     }
 }
