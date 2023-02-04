@@ -28,9 +28,11 @@ public class TestDataSupplierService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        /*
         initializeRoles();
         initializeUsers();
         initializeRides();
+        */
     }
 
     private void initializeRides() {
