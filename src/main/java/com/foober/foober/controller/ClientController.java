@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 
 @RestController
@@ -78,6 +77,12 @@ public class ClientController {
     @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<ActiveRideDto> getActiveRide(@CurrentUser LocalUser user) {
         return new ApiResponse<>(clientService.getActiveRide(user.getUser()));
+    }
+
+    @GetMapping("/get-usernames/{query}")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<List<String>> getUsernamesByQuery(@PathVariable String query, @CurrentUser LocalUser user) {
+        return new ApiResponse<>(clientService.getUsernamesByQuery(query, user.getUser()));
     }
 
 }

@@ -147,4 +147,10 @@ public class ControllerAdvisor {
         return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "The review period expired.");
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(InsufficientClientCredits.class)
+    public ApiResponse<?> handleInsufficientClientCredits(InsufficientClientCredits e) {
+        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "Client has insufficient credits.");
+    }
+
 }
