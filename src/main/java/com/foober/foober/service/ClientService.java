@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static com.foober.foober.util.SortUtils.sort;
 
 @Service
@@ -103,7 +105,7 @@ public class ClientService {
         }
     }
 
-     public boolean hasActiveRide(User user) {
+    public boolean hasActiveRide(User user) {
         return rideRepository.activeRideByUserIsPresent((Client) user);
     }
 
@@ -112,6 +114,12 @@ public class ClientService {
                 .map(ActiveRideDto::new)
                 .orElse(null);
     }
+
+    public List<String> getUsernamesByQuery(String query, User user) {
+        List<String> usernames = clientRepository.getClientByUsernameStartsWith(query).orElse(new ArrayList<>());
+        return usernames.stream().filter(e -> !e.equals(user.getUsername())).collect(Collectors.toList());
+    }
+
 
     public List<UserDto> getAllClients() {
         List<Client> clients = this.clientRepository.findAll();

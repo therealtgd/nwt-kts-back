@@ -7,7 +7,6 @@ import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.Client;
 import com.foober.foober.model.Driver;
 import com.foober.foober.model.enumeration.DriverStatus;
-import com.foober.foober.model.enumeration.RideStatus;
 import com.foober.foober.service.DriverService;
 import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
@@ -61,6 +60,10 @@ public class RideController {
     public ApiResponse<?> finishRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
         long ms = this.rideService.finishRide(id);
         ActiveRideDto ride = this.driverService.getNextRide((Driver) user.getUser());
+        this.simpMessagingTemplate.convertAndSend(
+                "/client/ride-finished/"+user.getUser().getId(),
+                ride
+        );
         if (ride != null) {
             this.simpMessagingTemplate.convertAndSend(
                     "/driver/active-ride/"+ride.getDriver().getUsername(),
@@ -108,20 +111,9 @@ public class RideController {
 
     @PostMapping("/order")
     @PreAuthorize("hasRole('ROLE_CLIENT')")
-    public ApiResponse<ActiveRideDto> orderRide(@RequestBody RideInfoDto rideInfoDto) {
-        ActiveRideDto ride = this.rideService.orderRide(rideInfoDto);
-        // If the driver is in an active ride, notify them that they have a ride waiting after this one
-        if (ride.getRideStatus() == RideStatus.WAITING) {
-            this.simpMessagingTemplate.convertAndSend(
-                    "/driver/ride-assigned/"+ride.getDriver().getUsername(),
-                    ride
-            );
-        } else { // Else notify the driver that they have a ride and set the ride status to ON_ROUTE and driver status to BUSY
-            this.simpMessagingTemplate.convertAndSend(
-                    "/driver/active-ride/"+ride.getDriver().getUsername(),
-                    ride
-            );
-        }
+    public ApiResponse<ActiveRideDto> orderRide(@RequestBody RideInfoDto rideInfoDto, @CurrentUser LocalUser user) {
+        ActiveRideDto ride = this.rideService.orderRide(rideInfoDto, (Client) user.getUser());
+
 
         return new ApiResponse<>(ride);
     }
@@ -152,7 +144,7 @@ public class RideController {
 
     @PostMapping("/{id}/review")
     @PreAuthorize("hasRole('ROLE_CLIENT')")
-    public ApiResponse<?> postReview(@CurrentUser LocalUser user, @RequestParam long id, @RequestBody ReviewDto reviewDto) {
+    public ApiResponse<?> postReview(@CurrentUser LocalUser user, @PathVariable long id, @RequestBody ReviewDto reviewDto) {
         rideService.reviewRide(id, reviewDto, user.getUser());
         return new ApiResponse<>(HttpStatus.OK);
     }
@@ -161,6 +153,29 @@ public class RideController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ApiResponse<DetailedRideDto> getDriverEta(@CurrentUser LocalUser user, @PathVariable Long id) {
         return new ApiResponse<>(rideService.getRide(user.getUser(), id));
+    }
+
+    @PutMapping("/{id}/accept-split-fare")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<?> acceptSplitFare(@PathVariable long id) {
+        rideService.acceptSplitFare(id);
+        return new ApiResponse<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/decline-split-fare")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<?> declineSplitFare(@PathVariable long id) {
+        Driver driver = rideService.declineSplitFare(id);
+        ActiveRideDto ride = this.driverService.getNextRide(driver);
+        if (ride != null) {
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/active-ride/"+ride.getDriver().getUsername(),
+                    ride
+            );
+        } else {
+            this.driverService.updateStatus(driver.getId(), DriverStatus.AVAILABLE);
+        }
+        return new ApiResponse<>(HttpStatus.OK);
     }
 
 }

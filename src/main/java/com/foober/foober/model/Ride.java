@@ -38,6 +38,7 @@ public class Ride {
     private Long endTime;
     @Column(nullable = false)
     private long eta;
+    private int splitFareCounter;
 
     public Ride(Set<Address> route,
                 double price,
@@ -83,5 +84,9 @@ public class Ride {
 
     public List<Address> getStops() {
         return this.getRoute().stream().filter(a -> a.getStation() != 0 && a.getStation() != this.getRoute().size() - 1).collect(Collectors.toList());
+    }
+
+    public int getSplitFarePrice() {
+        return (int) Math.round(this.getPrice() / this.getClients().size());
     }
 }

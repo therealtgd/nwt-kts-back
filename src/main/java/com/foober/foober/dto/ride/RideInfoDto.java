@@ -19,4 +19,8 @@ public class RideInfoDto {
     private List<AddressDto> stops;
     private double price;
     private List<String> clients;
+
+    public double getPrice() {
+        return price * clients.size();
+    }
 }
