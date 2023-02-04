@@ -38,7 +38,10 @@ public class Ride {
     private Long endTime;
     @Column(nullable = false)
     private long eta;
+    @Column()
     private int splitFareCounter;
+    @Column()
+    private Long reservationTime;
 
     public Ride(Set<Address> route,
                 double price,

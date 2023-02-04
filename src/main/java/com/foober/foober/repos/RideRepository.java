@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RideRepository extends JpaRepository<Ride, Long> {
+    List<Ride> findByStatus(RideStatus status);
 
     @Query("SELECT r from Ride r WHERE r.status = 'IN_PROGRESS' and r.driver.isReserved = false")
     Optional<List<Ride>> getAllInProgressNotReserved();
