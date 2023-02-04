@@ -27,6 +27,12 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
         double lng
     );
 
+    @Query(
+        "SELECT d FROM Driver d JOIN d.vehicle v WHERE d.status = 'AVAILABLE' and d.isReserved = false"
+        + " ORDER BY ABS(v.latitude - ?4) + ABS(v.longitude - ?5) ASC"
+    )
+    Optional<List<Driver>> findNearestFreeDriver();
+
     @Query("SELECT d from Driver d WHERE d.status = ?1")
     List<Driver> findAllByStatus(DriverStatus status);
 }

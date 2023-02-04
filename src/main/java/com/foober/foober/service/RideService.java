@@ -19,16 +19,21 @@ import com.google.maps.model.TravelMode;
 import com.google.maps.model.Unit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@EnableScheduling
 public class RideService {
 
     private final int PRICE_PER_KM = 60;
@@ -511,5 +516,98 @@ public class RideService {
         ride.setStatus(RideStatus.CANCELLED);
         ride = rideRepository.save(ride);
         return ride.getDriver();
+    }
+
+    @Scheduled(fixedRate = 60*1000)
+    public void checkReservations() {
+        Instant now = Instant.now();
+        List<Ride> rides = this.rideRepository.findByStatus(RideStatus.RESERVED);
+        for (Ride ride: rides) {
+            Instant reserveTime = Instant.ofEpochSecond(ride.getReservationTime());
+            Instant before15min = reserveTime.minus(15, ChronoUnit.MINUTES);
+            Instant before10min = reserveTime.minus(10, ChronoUnit.MINUTES);
+            Instant before5min = reserveTime.minus(5, ChronoUnit.MINUTES);
+
+            if (
+                now.isAfter(before15min.minus(30, ChronoUnit.SECONDS)) &&
+                    now.isBefore(before15min.plus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "15 minutes until your reservation."
+                    );
+                }
+            } else if (
+                now.isAfter(before10min.minus(30, ChronoUnit.SECONDS)) &&
+                    now.isBefore(before10min.plus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "10 minutes until your reservation."
+                    );
+                }
+            } else if (
+                now.isAfter(before5min.minus(30, ChronoUnit.SECONDS)) &&
+                    now.isBefore(before5min.plus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "5 minutes until your reservation."
+                    );
+                }
+            } else if (
+                now.isAfter(reserveTime.minus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "Your reserved ride will arrive shortly."
+                    );
+                }
+                Optional<List<Driver>> drivers = driverRepository.findNearestFreeDriver();
+                if (drivers.isPresent() && !drivers.get().isEmpty()) {
+                    Driver driver = drivers.get().get(0);
+                    driver.setStatus(DriverStatus.PENDING);
+                    driverRepository.save(driver);
+                    ride.setStatus(RideStatus.ON_ROUTE);
+                    ride.setDriver(driver);
+                    rideRepository.save(ride);
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/driver/active-ride/"+driver.getUsername(),
+                        new ActiveRideDto(ride)
+                    );
+                } else {
+                    List<Ride> ridesNearestToEnd = getRidesNearestToEnd();
+                    if (!ridesNearestToEnd.isEmpty()) {
+                        Driver driver = ridesNearestToEnd.get(0).getDriver();
+                        driver.setReserved(true);
+                        driverRepository.save(driver);
+                        ride.setStatus(RideStatus.WAITING);
+                        ride.setDriver(driver);
+                        rideRepository.save(ride);
+                        this.simpMessagingTemplate.convertAndSend(
+                            "/driver/ride-assigned/" + driver.getUsername(),
+                            new ActiveRideDto(ride)
+                        );
+                    }
+                }
+
+            }
+        }
+    }
+
+    public ActiveRideDto reserveRide(RideInfoDto rideInfoDto) {
+        Set<Client> clients = getClients(rideInfoDto);
+        Set<Address> route = getRoute(rideInfoDto);
+
+        Ride ride = new Ride(null, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
+        clients.forEach(ride::addClient);
+
+        this.rideRepository.save(ride);
+        clientRepository.saveAll(clients);
+        return new ActiveRideDto(ride);
     }
 }
