@@ -60,6 +60,10 @@ public class RideController {
     public ApiResponse<?> finishRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
         long ms = this.rideService.finishRide(id);
         ActiveRideDto ride = this.driverService.getNextRide((Driver) user.getUser());
+        this.simpMessagingTemplate.convertAndSend(
+                "/client/ride-finished/"+user.getUser().getId(),
+                ride
+        );
         if (ride != null) {
             this.simpMessagingTemplate.convertAndSend(
                     "/driver/active-ride/"+ride.getDriver().getUsername(),
@@ -140,7 +144,7 @@ public class RideController {
 
     @PostMapping("/{id}/review")
     @PreAuthorize("hasRole('ROLE_CLIENT')")
-    public ApiResponse<?> postReview(@CurrentUser LocalUser user, @RequestParam long id, @RequestBody ReviewDto reviewDto) {
+    public ApiResponse<?> postReview(@CurrentUser LocalUser user, @PathVariable long id, @RequestBody ReviewDto reviewDto) {
         rideService.reviewRide(id, reviewDto, user.getUser());
         return new ApiResponse<>(HttpStatus.OK);
     }
