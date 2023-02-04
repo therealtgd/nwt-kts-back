@@ -11,7 +11,6 @@ import com.foober.foober.security.oauth2.user.OAuth2UserInfo;
 import com.foober.foober.security.oauth2.user.OAuth2UserInfoFactory;
 import com.foober.foober.util.GeneralUtils;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -277,5 +276,11 @@ public class UserService {
             return client.isActivated() && client.isEnabled();
         }
         return true;
+    }
+    
+    public void updateIsEnabled(Long id, boolean value) {
+        User user = this.userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        user.setEnabled(value);
+        this.userRepository.save(user);
     }
 }

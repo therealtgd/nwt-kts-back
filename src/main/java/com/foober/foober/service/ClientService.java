@@ -1,9 +1,6 @@
 package com.foober.foober.service;
 
-import com.foober.foober.dto.LatLng;
-import com.foober.foober.dto.ActiveRideDto;
-import com.foober.foober.dto.RideBriefDisplay;
-import com.foober.foober.dto.RouteDto;
+import com.foober.foober.dto.*;
 import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.exception.InvalidTokenException;
 import com.foober.foober.exception.UserAlreadyActivatedException;
@@ -114,5 +111,19 @@ public class ClientService {
         return rideRepository.getActiveRideByClient((Client) user)
                 .map(ActiveRideDto::new)
                 .orElse(null);
+    }
+
+    public List<UserDto> getAllClients() {
+        List<Client> clients = this.clientRepository.findAll();
+        return clients.stream().map(UserDto::new).toList();
+    }
+
+    public List<RideBriefDisplay> getRidesById(Long id) {
+        Client client = clientRepository.getById(id);
+        List<RideBriefDisplay> rides = new ArrayList<>();
+        client.getRides().stream()
+            .filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
+            .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
+        return rides;
     }
 }

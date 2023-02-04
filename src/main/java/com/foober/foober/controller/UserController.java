@@ -58,4 +58,19 @@ public class UserController {
         userService.resetPassword(resetRequest);
         return new ApiResponse<>(HttpStatus.OK, "Successfully updated password.");
     }
+
+    @PutMapping("/{id}/enable")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<?> enableUser(@PathVariable Long id) {
+        this.userService.updateIsEnabled(id, true);
+        return new ApiResponse<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/disable")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<?> disableUser(@PathVariable Long id) {
+        this.userService.updateIsEnabled(id, true);
+        return new ApiResponse<>(HttpStatus.OK);
+    }
+
 }
