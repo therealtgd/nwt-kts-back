@@ -303,7 +303,7 @@ public class DriverService {
         List<RideBriefDisplay> rides = new ArrayList<>();
         driver.getRides().stream()
             .filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
-            .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, getRideReview(ride))));
+            .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, rideService.getRideDriverRating(ride))));
         return rides;
     }
 }
