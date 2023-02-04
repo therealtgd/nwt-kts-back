@@ -37,8 +37,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         Client client = (Client) userRepository.findByUsername("client").orElseThrow();
         Client client2 = (Client) userRepository.findByUsername("client2").orElseThrow();
         Ride ride = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 1"),
-                       new Address(2, 0, 0, "Gogoljeva 1")),
+                Set.of(new Address(1, 45.24545101752263, 19.83228969045274, "Puskinova 1"),
+                       new Address(2, 45.24575317126812, 19.835808748691015, "Gogoljeva 1")),
                 120,
                 0.96,
                 RideStatus.COMPLETED,
@@ -68,8 +68,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         reviewRepository.save(review1);
 
         Ride ride2 = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 2"),
-                        new Address(2, 0, 0, "Gogoljeva 2")),
+                Set.of(new Address(1, 45.246049647931315, 19.830989757605582, "Puskinova 2"),
+                        new Address(2, 45.24546996149418, 19.83657077301758, "Gogoljeva 2")),
                 350,
                 1.82,
                 RideStatus.COMPLETED,
@@ -92,8 +92,8 @@ public class TestDataSupplierService implements CommandLineRunner {
         reviewRepository.save(review2);
 
         Ride ride3 = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 3"),
-                        new Address(2, 0, 0, "Gogoljeva 3")),
+                Set.of(new Address(1, 45.24587607910168, 19.831609540763406, "Puskinova 3"),
+                        new Address(2, 45.24553820777609, 19.83631330555981, "Gogoljeva 3")),
                 479,
                 2.4,
                 RideStatus.COMPLETED,
@@ -115,8 +115,8 @@ public class TestDataSupplierService implements CommandLineRunner {
 
 
         Ride ride4 = new Ride(
-                Set.of(new Address(1, 0, 0, "Puskinova 4"),
-                        new Address(2, 0, 0, "Gogoljeva 4")),
+                Set.of(new Address(1, 45.24587607910168, 19.831609540763406, "Puskinova 4"),
+                        new Address(2, 45.24553820777609, 19.83631330555981, "Gogoljeva 4")),
                 560,
                 3.78,
                 RideStatus.COMPLETED,

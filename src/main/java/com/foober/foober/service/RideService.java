@@ -453,9 +453,9 @@ public class RideService {
         return dtos;
     }
 
-    private List<ReviewDto> reviewsToDto (List<Review> reviews) {
-        ArrayList<ReviewDto> dtos = new ArrayList<>();
-        reviews.forEach(r -> dtos.add(new ReviewDto(r)));
+    private List<FullReviewDto> reviewsToDto (List<Review> reviews) {
+        ArrayList<FullReviewDto> dtos = new ArrayList<>();
+        reviews.forEach(r -> dtos.add(new FullReviewDto(r)));
         return dtos;
     }
 
@@ -511,5 +511,9 @@ public class RideService {
         ride.setStatus(RideStatus.CANCELLED);
         ride = rideRepository.save(ride);
         return ride.getDriver();
+    }
+
+    public Ride getRideById(long id) {
+        return rideRepository.getById(id);
     }
 }

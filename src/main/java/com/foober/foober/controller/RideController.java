@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
-import javax.websocket.server.PathParam;
 
 @RestController
 @RequestMapping(value = "/ride" ,produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,8 +60,8 @@ public class RideController {
         long ms = this.rideService.finishRide(id);
         ActiveRideDto ride = this.driverService.getNextRide((Driver) user.getUser());
         this.simpMessagingTemplate.convertAndSend(
-                "/client/ride-finished/"+user.getUser().getId(),
-                ride
+                "/client/ride-finished/"+user.getUser().getUsername(),
+                "You arrived at the destination."
         );
         if (ride != null) {
             this.simpMessagingTemplate.convertAndSend(

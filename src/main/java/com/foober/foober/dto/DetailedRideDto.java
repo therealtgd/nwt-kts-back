@@ -19,7 +19,7 @@ public class DetailedRideDto {
     private double distance;
     private double duration;
     private List<AddressDto> stops;
-    private List<ReviewDto> reviews;
+    private List<FullReviewDto> reviews;
     private double price;
     private double vehicleRating;
     private double driverRating;
