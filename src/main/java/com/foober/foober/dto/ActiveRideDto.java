@@ -3,11 +3,15 @@ package com.foober.foober.dto;
 import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.model.Ride;
 import com.foober.foober.model.enumeration.RideStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActiveRideDto {
     private long id;
     private DriverDto driver;

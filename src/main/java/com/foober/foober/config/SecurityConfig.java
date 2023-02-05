@@ -61,6 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     "/oauth2/**",
                     "/image/**",
                     "/ride/price",
+                    "/ride/order2",
                     "/vehicle/types",
                     "/client/register/confirm",
                     "/socket/**",
