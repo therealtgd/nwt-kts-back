@@ -58,15 +58,16 @@ public class RideController {
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<?> finishRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
         long ms = this.rideService.finishRide(id);
-        ActiveRideDto ride = this.driverService.getNextRide((Driver) user.getUser());
+        ActiveRideDto ride = new ActiveRideDto(this.rideService.getById(id));
         this.simpMessagingTemplate.convertAndSend(
                 "/client/ride-finished/"+user.getUser().getId(),
                 ride
         );
-        if (ride != null) {
+        ActiveRideDto nextRide = this.driverService.getNextRide((Driver) user.getUser());
+        if (nextRide != null) {
             this.simpMessagingTemplate.convertAndSend(
-                    "/driver/active-ride/"+ride.getDriver().getUsername(),
-                    ride
+                    "/driver/active-ride/"+nextRide.getDriver().getUsername(),
+                    nextRide
             );
         } else {
             this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);

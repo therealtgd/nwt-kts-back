@@ -42,6 +42,10 @@ public class HomePage {
     private WebElement payRideButton;
     @FindBy(css = "button.p-dialog-header-close")
     private WebElement cancelRideButton;
+    @FindBy(id = "startRide")
+    private WebElement startRideButton;
+    @FindBy(id = "finishRide")
+    private WebElement finishRideButton;
 
     private void reload() {
         try {
@@ -112,5 +116,28 @@ public class HomePage {
 
     public boolean requestRideDisabled() {
         return !requestRideButton.isEnabled();
+    }
+
+    public void payRide() {
+
+        payRideButton.click();
+    }
+
+    public void startRide() {
+        (new WebDriverWait(driver, 30))
+            .until(ExpectedConditions.presenceOfElementLocated(By.id("startRide")));
+        startRideButton.click();
+    }
+
+    public boolean finishRideAvailable() {
+        (new WebDriverWait(driver, 30))
+            .until(ExpectedConditions.presenceOfElementLocated(By.id("finishRide")));
+        return true;
+    }
+
+    public void finishRide() {
+        (new WebDriverWait(driver, 30))
+            .until(ExpectedConditions.presenceOfElementLocated(By.id("finishRide")));
+        finishRideButton.click();
     }
 }
