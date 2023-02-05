@@ -42,7 +42,7 @@ public class OrderRideTests {
     }
 
     @Test
-    public void orderRide() {
+    public void should_order_ride() {
         HomePage homePage = new HomePage(driver);
         homePage.enterPickupLocation("FTN");
         homePage.enterDestination("Srpsko narodno pozoriste");
@@ -53,7 +53,7 @@ public class OrderRideTests {
     }
 
     @Test
-    public void orderRideWithStops() {
+    public void should_order_ride_with_stops() {
         HomePage homePage = new HomePage(driver);
         homePage.enterPickupLocation("Promenada");
         homePage.addStop();
