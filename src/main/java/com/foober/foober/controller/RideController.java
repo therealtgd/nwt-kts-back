@@ -12,6 +12,7 @@ import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -77,9 +78,9 @@ public class RideController {
     @Transactional
     @PutMapping("/{id}/end")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
-    public ApiResponse<?> endRide(@CurrentUser LocalUser user,
-                                  @PathVariable("id") long id,
-                                  @RequestBody RideCancellationDto rideCancellationDto
+    public ResponseEntity<SimpleApiResponse> endRide(@CurrentUser LocalUser user,
+                                                    @PathVariable("id") long id,
+                                                    @RequestBody RideCancellationDto rideCancellationDto
     ) {
         this.driverService.updateStatus(user.getUser().getId(), DriverStatus.AVAILABLE);
         this.rideService.endRide(id, rideCancellationDto);
@@ -88,7 +89,7 @@ public class RideController {
                     "/client/ride-cancelled/"+c.getUsername(),
                     "The driver cancelled your ride.\nYour tokens have been refunded."
             );
-        return new ApiResponse<>(HttpStatus.OK);
+        return new ResponseEntity<>(new SimpleApiResponse(true, "Success"), HttpStatus.OK);
     }
 
     @GetMapping("/nearest-free-driver")

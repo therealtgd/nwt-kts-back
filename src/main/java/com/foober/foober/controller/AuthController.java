@@ -8,6 +8,8 @@ import com.foober.foober.security.jwt.TokenProvider;
 import com.foober.foober.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +32,7 @@ public class AuthController {
     private final TokenProvider tokenProvider;
 
     @PostMapping("/signin")
-    public ApiResponse<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ApiResponse<String> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         if (!userService.isActivated(loginRequest.getEmail())) {
             throw new UserIsNotActivatedException("Bad credentials.");
         }
@@ -39,6 +41,17 @@ public class AuthController {
         String jwt = tokenProvider.createToken(authentication);
         userService.setOnlineUser(loginRequest.getEmail());
         return new ApiResponse<>(jwt);
+    }
+    @PostMapping("/signin2")
+    public ResponseEntity<String> authenticateUser2(@Valid @RequestBody LoginRequest loginRequest) {
+        if (!userService.isActivated(loginRequest.getEmail())) {
+            throw new UserIsNotActivatedException("Bad credentials.");
+        }
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication);
+        userService.setOnlineUser(loginRequest.getEmail());
+        return new ResponseEntity<String>(jwt, HttpStatus.OK);
     }
 
     @PostMapping("/signup")
