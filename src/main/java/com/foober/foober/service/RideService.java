@@ -610,4 +610,8 @@ public class RideService {
         clientRepository.saveAll(clients);
         return new ActiveRideDto(ride);
     }
+
+    public Ride getById(long id) {
+        return rideRepository.getById(id);
+    }
 }
