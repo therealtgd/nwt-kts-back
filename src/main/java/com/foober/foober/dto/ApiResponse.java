@@ -5,29 +5,36 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class ApiResponse<T> {
-    private final boolean success;
-    private final HttpStatus status;
-    private final String message;
-    private final T body;
+    private boolean success;
+    private HttpStatusDto status;
+    private String message;
+    private T body;
 
+    public ApiResponse() {
+        this.success = true;
+        this.status = new HttpStatusDto(HttpStatus.OK.value(), HttpStatus.OK.name());
+        this.message = "OK";
+        this.body = null;
+    }
     public ApiResponse(String message) {
         this.success = true;
-        this.status = HttpStatus.OK;
+        this.status = new HttpStatusDto(HttpStatus.OK.value(), HttpStatus.OK.name());
         this.message = message;
         this.body = null;
     }
 
     public ApiResponse(HttpStatus status, String message) {
         this.success = status.value() >= 200 && status.value() < 300;
-        this.status = status;
+        this.status = new HttpStatusDto(status.value(), status.name());;
         this.message = message;
         this.body = null;
     }
 
     public ApiResponse(HttpStatus status, String message, T body) {
         this.success = status.value() >= 200 && status.value() < 300;
-        this.status = status;
+        this.status = new HttpStatusDto(status.value(), status.name());;;
         this.message = message;
         this.body = body;
     }
@@ -35,21 +42,15 @@ public class ApiResponse<T> {
     public ApiResponse(T body) {
         this.body = body;
         this.success = true;
-        this.status = HttpStatus.OK;
+        this.status = new HttpStatusDto(HttpStatus.OK.value(), HttpStatus.OK.name());
         this.message = "";
     }
 
     public ApiResponse(HttpStatus status) {
         this.success = status.value() >= 200 && status.value() < 300;
-        this.status = status;
+        this.status = new HttpStatusDto(status.value(), status.name());;
         this.message = null;
         this.body = null;
     }
 
-    public HttpStatusDto getStatus() {
-        return new HttpStatusDto(status.value(), status.name());
-    }
-
-    private record HttpStatusDto(int value, String name) {
-    }
 }

@@ -1,8 +1,6 @@
 package com.foober.foober.dto;
 
-import java.util.Collection;
-import java.util.Map;
-
+import com.foober.foober.util.GeneralUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
@@ -10,7 +8,8 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.foober.foober.util.GeneralUtils;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  *

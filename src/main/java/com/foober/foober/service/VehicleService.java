@@ -31,7 +31,6 @@ public class VehicleService {
         vehicle.setLongitude(latlng.getLng());
         this.vehicleRepository.save(vehicle);
     }
-    @Transactional
     public void updateVehicleLocation(Vehicle vehicle, LatLng latlng) throws ResourceNotFoundException {
         vehicle.setLatitude(latlng.getLat());
         vehicle.setLongitude(latlng.getLng());

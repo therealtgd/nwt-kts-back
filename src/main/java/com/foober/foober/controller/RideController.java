@@ -12,6 +12,7 @@ import com.foober.foober.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -43,14 +44,14 @@ public class RideController {
 
     @PutMapping("/{id}/start")
     @PreAuthorize("hasRole('ROLE_DRIVER')")
-    public ApiResponse<Long> startRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
+    public ResponseEntity<Long> startRide(@CurrentUser LocalUser user, @PathVariable("id") long id) {
         this.driverService.updateStatus(user.getUser().getId(), DriverStatus.BUSY);
         long startTime = this.rideService.startRide(id);
         this.simpMessagingTemplate.convertAndSend(
             "/driver/ride-started/"+user.getUser().getUsername(),
-            this.driverService.getCurrentRideByDriver((Driver) user.getUser())
+            this.driverService.getCurrentRideByDriver((Driver) (user.getUser()))
         );
-        return new ApiResponse<>(startTime);
+        return ResponseEntity.ok(startTime);
     }
 
     @Transactional

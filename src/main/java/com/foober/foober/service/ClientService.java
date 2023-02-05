@@ -105,10 +105,6 @@ public class ClientService {
         }
     }
 
-    public boolean hasActiveRide(User user) {
-        return rideRepository.activeRideByUserIsPresent((Client) user);
-    }
-
     public ActiveRideDto getActiveRide(User user) {
         return rideRepository.getActiveRideByClient((Client) user)
                 .map(ActiveRideDto::new)

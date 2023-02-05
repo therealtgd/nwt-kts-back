@@ -42,7 +42,6 @@ public class DriverService {
     private final VehicleRepository vehicleRepository;
     private final PendingDriverChangesRepository driverChangesRepository;
     private final RideRepository rideRepository;
-    private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final VehicleService vehicleService;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
