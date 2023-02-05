@@ -1,9 +1,6 @@
 package com.foober.foober.service;
 
-import com.foober.foober.dto.LatLng;
-import com.foober.foober.dto.ActiveRideDto;
-import com.foober.foober.dto.RideBriefDisplay;
-import com.foober.foober.dto.RouteDto;
+import com.foober.foober.dto.*;
 import com.foober.foober.dto.ride.AddressDto;
 import com.foober.foober.exception.InvalidTokenException;
 import com.foober.foober.exception.UserAlreadyActivatedException;
@@ -18,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static com.foober.foober.util.SortUtils.sort;
 
 @Service
@@ -106,7 +105,7 @@ public class ClientService {
         }
     }
 
-     public boolean hasActiveRide(User user) {
+    public boolean hasActiveRide(User user) {
         return rideRepository.activeRideByUserIsPresent((Client) user);
     }
 
@@ -114,5 +113,25 @@ public class ClientService {
         return rideRepository.getActiveRideByClient((Client) user)
                 .map(ActiveRideDto::new)
                 .orElse(null);
+    }
+
+    public List<String> getUsernamesByQuery(String query, User user) {
+        List<String> usernames = clientRepository.getClientByUsernameStartsWith(query).orElse(new ArrayList<>());
+        return usernames.stream().filter(e -> !e.equals(user.getUsername())).collect(Collectors.toList());
+    }
+
+
+    public List<UserDto> getAllClients() {
+        List<Client> clients = this.clientRepository.findAll();
+        return clients.stream().map(UserDto::new).toList();
+    }
+
+    public List<RideBriefDisplay> getRidesById(Long id) {
+        Client client = clientRepository.getById(id);
+        List<RideBriefDisplay> rides = new ArrayList<>();
+        client.getRides().stream()
+            .filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
+            .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, client)));
+        return rides;
     }
 }

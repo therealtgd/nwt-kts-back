@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 
 @RestController
@@ -21,6 +20,12 @@ import java.util.Set;
 public class ClientController {
 
     private final ClientService clientService;
+
+    @GetMapping("/get-all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<UserDto>> getAllClients() {
+        return new ApiResponse<>(this.clientService.getAllClients());
+    }
 
     @PostMapping("/register/confirm")
     public ApiResponse<Object> confirmRegistration(@Valid @RequestBody ClientSignUpConfirmation data) {
@@ -40,6 +45,12 @@ public class ClientController {
     @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<List<RideBriefDisplay>> getRides(@CurrentUser LocalUser user, @PathVariable String criteria) {
         return new ApiResponse<>(clientService.getRides(user.getUser(), criteria));
+    }
+
+    @GetMapping("/{id}/rides/")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<RideBriefDisplay>> gerRidesByID(@PathVariable Long id) {
+        return new ApiResponse<>(clientService.getRidesById(id));
     }
 
     @GetMapping("/favorite-routes")
@@ -66,6 +77,12 @@ public class ClientController {
     @PreAuthorize("hasRole('ROLE_CLIENT')")
     public ApiResponse<ActiveRideDto> getActiveRide(@CurrentUser LocalUser user) {
         return new ApiResponse<>(clientService.getActiveRide(user.getUser()));
+    }
+
+    @GetMapping("/get-usernames/{query}")
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    public ApiResponse<List<String>> getUsernamesByQuery(@PathVariable String query, @CurrentUser LocalUser user) {
+        return new ApiResponse<>(clientService.getUsernamesByQuery(query, user.getUser()));
     }
 
 }

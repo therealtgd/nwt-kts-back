@@ -7,6 +7,7 @@ import com.foober.foober.dto.ride.SimpleDriverDto;
 import com.foober.foober.model.enumeration.DriverStatus;
 import com.foober.foober.model.enumeration.VehicleType;
 import lombok.SneakyThrows;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.Test;
 import org.junit.jupiter.api.Disabled;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,47 +35,19 @@ public class DriveRejectionIntegrationTest {
     private String clientToken;
 
     @SneakyThrows
-    @BeforeEach
+    @Before
     public void login() {
         ResponseEntity<String> responseEntityDriver =
                 restTemplate.postForEntity("/auth/signin2",
-                        new HttpEntity<>(new LoginRequest("driver@gmail.com", "sifra123")),
+                        new HttpEntity<>(new LoginRequest("driver@gmail.com", "driver")),
                         String.class);
         driverToken = responseEntityDriver.getBody();
 
         ResponseEntity<String> responseEntityClient =
                 restTemplate.postForEntity("/auth/signin2",
-                        new HttpEntity<>(new LoginRequest("client@gmail.com", "sifra123")),
+                        new HttpEntity<>(new LoginRequest("client@gmail.com", "client")),
                         String.class);
         clientToken = responseEntityClient.getBody();
-    }
-
-    @Test
-    @Disabled
-    //@WithUserDetails("client@gmail.com")
-    public void orderRide() {
-
-        RideInfoDto rideInfoDto = new RideInfoDto(
-                0,
-                0,
-                new AddressDto("", new LatLng(0.0,0.0)),
-                new AddressDto("", new LatLng(0.0,0.0)),
-                VehicleType.SEDAN,
-                new SimpleDriverDto(2, "client", "", DriverStatus.AVAILABLE, false),
-                List.of(new AddressDto("", new LatLng(0.0,0.0))),
-                0,
-                List.of("client")
-        );
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(clientToken);
-        ResponseEntity<ActiveRideDto>  response = restTemplate.postForEntity(
-                "/ride/order",
-                rideInfoDto,
-                ActiveRideDto.class,
-                headers);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
@@ -84,7 +58,6 @@ public class DriveRejectionIntegrationTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(driverToken);
-        headers.setBasicAuth("driver@gmail.com", "driver");
         HttpEntity<RideCancellationDto> entity = new HttpEntity<>(rideCancellationDto, headers);
 
         ResponseEntity<SimpleApiResponse> response = restTemplate.exchange(
@@ -104,7 +77,6 @@ public class DriveRejectionIntegrationTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(driverToken);
-        headers.setBasicAuth("driver@gmail.com", "driver");
         HttpEntity<RideCancellationDto> entity = new HttpEntity<>(rideCancellationDto, headers);
 
         ResponseEntity<SimpleApiResponse> response = restTemplate.exchange(

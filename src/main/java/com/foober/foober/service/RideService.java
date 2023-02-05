@@ -18,16 +18,22 @@ import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.TravelMode;
 import com.google.maps.model.Unit;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@EnableScheduling
 public class RideService {
 
     private final int PRICE_PER_KM = 60;
@@ -38,13 +44,15 @@ public class RideService {
     private final ClientRepository clientRepository;
     private final CancellationReasonRepository cancellationRepository;
     private final ReviewRepository reviewRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository, CancellationReasonRepository cancellationRepository, ReviewRepository reviewRepository) {
+    public RideService(RideRepository rideRepository, DriverRepository driverRepository, ClientRepository clientRepository, CancellationReasonRepository cancellationRepository, ReviewRepository reviewRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.rideRepository = rideRepository;
         this.driverRepository = driverRepository;
         this.clientRepository = clientRepository;
         this.cancellationRepository = cancellationRepository;
         this.reviewRepository = reviewRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     public int getPrice(String vehicleType, int distance) throws IllegalArgumentException {
@@ -88,62 +96,91 @@ public class RideService {
         return rideList;
     }
 
-    /**
-     * Create a new ride.
-     *
-     * @param  rideInfoDto ride information sent from FE client
-     * @return true if the driver is AVAILABLE; false if he is BUSY
-     */
-    public ActiveRideDto orderRide(RideInfoDto rideInfoDto) {
+    @Transactional
+    public ActiveRideDto orderRide(RideInfoDto rideInfoDto, Client client) {
         Set<Client> clients = getClients(rideInfoDto);
         Driver driver = getDriver(rideInfoDto);
         Set<Address> route = getRoute(rideInfoDto);
 
         Ride ride = new Ride(driver, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
-
         clients.forEach(ride::addClient);
-        clients.forEach(c -> c.setStatus(ClientStatus.IN_RIDE));
+
+        client.setStatus(ClientStatus.IN_RIDE);
+        if (clients.size() > 1) {
+            // Send notifications to split fare clients, set ride status to PENDING_PAYMENT
+            handleSplitFareRide(ride, client);
+        } else {
+            setRideEta(ride);
+        }
+
+        // If the driver is in an active ride, notify them that they have a ride waiting after this one
+        if (ride.getStatus() == RideStatus.WAITING) {
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/ride-assigned/" + ride.getDriver().getUsername(),
+                    new ActiveRideDto(ride)
+            );
+        } else if (ride.getClients().size() == 1) { // Else notify the driver that they have a ride and set the ride status to ON_ROUTE and driver status to BUSY
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/active-ride/"+ride.getDriver().getUsername(),
+                    new ActiveRideDto(ride)
+            );
+        }
+
+        clientRepository.saveAll(clients);
+        return new ActiveRideDto(ride);
+    }
+
+    private void setRideEta(Ride ride) {
         try {
             long eta;
+            Driver driver = ride.getDriver();
             if (driver.getStatus().equals(DriverStatus.BUSY)) {
-                eta = getBusyDriverEta(rideInfoDto, driver);
-
+                eta = getBusyDriverEta(ride, driver);
                 ride.setStatus(RideStatus.WAITING); // If the driver is already in an active ride, this ride has to WAIT until he completes it
             } else {
                 eta = this.getTimeLeftOnRoute(
                         driver.getVehicle().getLatitude(),
                         driver.getVehicle().getLongitude(),
-                        rideInfoDto.getStartAddress().getCoordinates().getLat(),
-                        rideInfoDto.getStartAddress().getCoordinates().getLng()
+                        ride.getStartAddress().getLatitude(),
+                        ride.getStartAddress().getLongitude()
                 );
-
                 ride.setStatus(RideStatus.ON_ROUTE);
                 driver.setStatus(DriverStatus.BUSY);
             }
             ride.setEta(eta);
-
-            ride = rideRepository.save(ride);
-            clientRepository.saveAll(clients);
+            rideRepository.save(ride);
             driverRepository.save(driver);
-
-            return new ActiveRideDto(ride);
         } catch (Exception e) {
             throw new UnableToGetDriverEtaException();
         }
+
     }
 
-    private long getBusyDriverEta(RideInfoDto rideInfoDto, Driver driver) throws Exception {
+    private void handleSplitFareRide(Ride ride, Client client) {
+        ride.setStatus(RideStatus.PENDING_PAYMENT);
+        ride = rideRepository.save(ride);
+        for (Client c: ride.getClients().stream().filter(c -> !Objects.equals(c.getId(), client.getId())).toList()) {
+            this.simpMessagingTemplate.convertAndSend(
+                    "/client/split-fare/"+c.getUsername(),
+                    new ActiveRideDto(ride)
+            );
+        }
+    }
+
+    private long getBusyDriverEta(Ride ride, Driver driver) throws Exception {
+        Ride driversRide = rideRepository.getRideByStatusAndDriverId(RideStatus.IN_PROGRESS, driver.getId())
+                .orElseThrow(UnableToGetDriverEtaException::new);
         long activeRideTimeUntilEnd = this.getTimeLeftOnRoute(
                 driver.getVehicle().getLatitude(),
                 driver.getVehicle().getLongitude(),
-                rideInfoDto.getEndAddress().getCoordinates().getLat(),
-                rideInfoDto.getEndAddress().getCoordinates().getLng()
+                driversRide.getEndAddress().getLatitude(),
+                driversRide.getEndAddress().getLongitude()
         );
         long newRideDriverEta = this.getTimeLeftOnRoute(
-                rideInfoDto.getEndAddress().getCoordinates().getLat(),
-                rideInfoDto.getEndAddress().getCoordinates().getLng(),
-                rideInfoDto.getStartAddress().getCoordinates().getLat(),
-                rideInfoDto.getStartAddress().getCoordinates().getLng()
+                driversRide.getEndAddress().getLatitude(),
+                driversRide.getEndAddress().getLongitude(),
+                ride.getStartAddress().getLatitude(),
+                ride.getStartAddress().getLongitude()
         );
         return activeRideTimeUntilEnd + newRideDriverEta;
     }
@@ -449,4 +486,128 @@ public class RideService {
         }
     }
 
+
+    public void acceptSplitFare(long id) {
+        Ride ride = rideRepository.getById(id);
+        ride.setSplitFareCounter(ride.getSplitFareCounter()+1);
+
+        // Everyone paid
+        if (ride.getSplitFareCounter() == ride.getClients().size() - 1) {
+            setRideEta(ride);
+            for (Client c: ride.getClients()) {
+                c.pay(ride.getSplitFarePrice());
+            }
+            for (Client c: ride.getClients()) {
+                this.simpMessagingTemplate.convertAndSend(
+                        "/client/split-fare-ride-started/"+c.getUsername(),
+                        new ActiveRideDto(ride)
+                );
+            }
+            this.simpMessagingTemplate.convertAndSend(
+                    "/driver/active-ride/"+ride.getDriver().getUsername(),
+                    new ActiveRideDto(ride)
+            );
+            clientRepository.saveAll(ride.getClients());
+        }
+    }
+
+    public Driver declineSplitFare(long id) {
+        Ride ride = this.rideRepository.getById(id);
+        ride.setStatus(RideStatus.CANCELLED);
+        ride = rideRepository.save(ride);
+        return ride.getDriver();
+    }
+
+    @Scheduled(fixedRate = 60*1000)
+    public void checkReservations() {
+        Instant now = Instant.now();
+        List<Ride> rides = this.rideRepository.findByStatus(RideStatus.RESERVED);
+        for (Ride ride: rides) {
+            Instant reserveTime = Instant.ofEpochSecond(ride.getReservationTime());
+            Instant before15min = reserveTime.minus(15, ChronoUnit.MINUTES);
+            Instant before10min = reserveTime.minus(10, ChronoUnit.MINUTES);
+            Instant before5min = reserveTime.minus(5, ChronoUnit.MINUTES);
+
+            if (
+                now.isAfter(before15min.minus(30, ChronoUnit.SECONDS)) &&
+                    now.isBefore(before15min.plus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "15 minutes until your reservation."
+                    );
+                }
+            } else if (
+                now.isAfter(before10min.minus(30, ChronoUnit.SECONDS)) &&
+                    now.isBefore(before10min.plus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "10 minutes until your reservation."
+                    );
+                }
+            } else if (
+                now.isAfter(before5min.minus(30, ChronoUnit.SECONDS)) &&
+                    now.isBefore(before5min.plus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "5 minutes until your reservation."
+                    );
+                }
+            } else if (
+                now.isAfter(reserveTime.minus(30, ChronoUnit.SECONDS))
+            ) {
+                for (Client c: ride.getClients()) {
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/client/reservation/"+c.getUsername(),
+                        "Your reserved ride will arrive shortly."
+                    );
+                }
+                Optional<List<Driver>> drivers = driverRepository.findNearestFreeDriver();
+                if (drivers.isPresent() && !drivers.get().isEmpty()) {
+                    Driver driver = drivers.get().get(0);
+                    driver.setStatus(DriverStatus.PENDING);
+                    driverRepository.save(driver);
+                    ride.setStatus(RideStatus.ON_ROUTE);
+                    ride.setDriver(driver);
+                    rideRepository.save(ride);
+                    this.simpMessagingTemplate.convertAndSend(
+                        "/driver/active-ride/"+driver.getUsername(),
+                        new ActiveRideDto(ride)
+                    );
+                } else {
+                    List<Ride> ridesNearestToEnd = getRidesNearestToEnd();
+                    if (!ridesNearestToEnd.isEmpty()) {
+                        Driver driver = ridesNearestToEnd.get(0).getDriver();
+                        driver.setReserved(true);
+                        driverRepository.save(driver);
+                        ride.setStatus(RideStatus.WAITING);
+                        ride.setDriver(driver);
+                        rideRepository.save(ride);
+                        this.simpMessagingTemplate.convertAndSend(
+                            "/driver/ride-assigned/" + driver.getUsername(),
+                            new ActiveRideDto(ride)
+                        );
+                    }
+                }
+
+            }
+        }
+    }
+
+    public ActiveRideDto reserveRide(RideInfoDto rideInfoDto) {
+        Set<Client> clients = getClients(rideInfoDto);
+        Set<Address> route = getRoute(rideInfoDto);
+
+        Ride ride = new Ride(null, route, rideInfoDto.getPrice(), rideInfoDto.getDistance());
+        clients.forEach(ride::addClient);
+
+        this.rideRepository.save(ride);
+        clientRepository.saveAll(clients);
+        return new ActiveRideDto(ride);
+    }
 }

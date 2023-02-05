@@ -292,5 +292,19 @@ public class DriverService {
         Ride ride = rideRepository.getRideByStatusAndDriverId(RideStatus.IN_PROGRESS, driver.getId()).orElseThrow();
         return new ActiveRideDto(ride);
     }
+
+    public List<UserDto> getAllDrivers() {
+        List<Driver> driver = this.driverRepository.findAll();
+        return driver.stream().map(UserDto::new).toList();
+    }
+
+    public List<RideBriefDisplay> getRidesById(Long id) {
+        Driver driver = driverRepository.getById(id);
+        List<RideBriefDisplay> rides = new ArrayList<>();
+        driver.getRides().stream()
+            .filter(ride -> ride.getStatus() == RideStatus.COMPLETED)
+            .forEach(ride -> rides.add(DtoConverter.rideToBriefDisplay(ride, rideService.getRideDriverRating(ride))));
+        return rides;
+    }
 }
 

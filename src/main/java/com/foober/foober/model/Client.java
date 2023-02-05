@@ -1,12 +1,12 @@
 package com.foober.foober.model;
 
-import javax.persistence.*;
-
+import com.foober.foober.exception.InsufficientClientCredits;
 import com.foober.foober.model.enumeration.ClientStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,5 +61,11 @@ public class Client extends User {
         this.provider = provider;
         this.providerUserId = providerUserId;
         this.status = ClientStatus.OFFLINE;
+    }
+
+    public void pay(int price) {
+        if (this.getCredits() - price < 0) {
+            throw new InsufficientClientCredits();
+        }
     }
 }

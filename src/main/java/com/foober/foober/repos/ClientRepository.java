@@ -18,4 +18,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     @Query("SELECT c from Client c JOIN c.rides r where c.id = ?1 AND (r.status = 'ON_ROUTE' OR r.status = 'IN_PROGRESS') ")
     Optional<Client> getClientInActiveRideById(long id);
 
+    @Query("SELECT c.username from Client c where c.username LIKE :query%")
+    Optional<List<String>> getClientByUsernameStartsWith(@Param("query") String query);
 }

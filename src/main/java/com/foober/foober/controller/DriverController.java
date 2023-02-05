@@ -32,6 +32,14 @@ public class DriverController {
     public ApiResponse<DriverDto> getDriver(@CurrentUser LocalUser user) {
         return new ApiResponse<>(this.driverService.getCompatibleDriverDto(user.getUser().getId()));
     }
+
+    @GetMapping("/get-all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<UserDto>> getAllDrivers() {
+        return new ApiResponse<>(this.driverService.getAllDrivers());
+    }
+
+
     @GetMapping(path = "/get-all-active")
     public ApiResponse<List<DriverDto>> getActiveDrivers() {
         return new ApiResponse<>(this.driverService.getActiveDriverDtos());
@@ -46,6 +54,12 @@ public class DriverController {
     @PreAuthorize("hasRole('ROLE_DRIVER')")
     public ApiResponse<List<RideBriefDisplay>> getRides(@CurrentUser LocalUser user, @PathVariable String criteria) {
         return new ApiResponse<>(driverService.getRides(user.getUser(), criteria));
+    }
+
+    @GetMapping("/{id}/rides/")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<RideBriefDisplay>> gerRidesByID(@PathVariable Long id) {
+        return new ApiResponse<>(driverService.getRidesById(id));
     }
     
     @Transactional
