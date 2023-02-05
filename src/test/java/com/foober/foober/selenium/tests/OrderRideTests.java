@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrderRideTests {
 
@@ -65,6 +65,26 @@ public class OrderRideTests {
         homePage.requestRide();
         assertTrue(homePage.payRideButtonAvailable());
         Helper.takeScreenshot(driver, "order_ride_test_order_ride_with_stops");
+        homePage.cancelRide();
+    }
+
+    @Test
+    public void should_disallow_order_with_missing_pickup_location() {
+        HomePage homePage = new HomePage(driver);
+        homePage.enterDestination("FTN");
+        homePage.clickAllowBabiesBox();
+        assertTrue(homePage.requestRideDisabled());
+        Helper.takeScreenshot(driver, "order_ride_test_order_with_missing_pickup_location");
+        homePage.cancelRide();
+    }
+
+    @Test
+    public void should_disallow_order_with_missing_destination() {
+        HomePage homePage = new HomePage(driver);
+        homePage.enterPickupLocation("FTN");
+        homePage.clickAllowBabiesBox();
+        assertTrue(homePage.requestRideDisabled());
+        Helper.takeScreenshot(driver, "order_ride_test_order_with_missing_destination");
         homePage.cancelRide();
     }
 }

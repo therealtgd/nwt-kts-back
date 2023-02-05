@@ -109,4 +109,8 @@ public class HomePage {
     public void addStop() {
         addStopButton.click();
     }
+
+    public boolean requestRideDisabled() {
+        return !requestRideButton.isEnabled();
+    }
 }
