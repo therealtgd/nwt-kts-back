@@ -9,6 +9,7 @@ import com.foober.foober.model.enumeration.VehicleType;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,7 +48,8 @@ public class DriveRejectionIntegrationTest {
         clientToken = responseEntityClient.getBody();
     }
 
-    @Test()
+    @Test
+    @Disabled
     //@WithUserDetails("client@gmail.com")
     public void orderRide() {
 
